@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + TS</title>
+  </head>
+  <body>
+    <div id="container">
+      <div id="pyramid" class="animate">
+        <div id="face-a" class="face">A</div>
+        <div id="face-b" class="face">B</div>
+        <div id="face-c" class="face">C</div>
+        <div id="face-d" class="face">D</div>
+        <div id="face-e" class="base">E</div>
+        <div id="face-t" class="base">T</div>
+      </div>
+    </div>
+    <script>
+      function calculateAngle(oppositeSideLength, adjacentSideLength) {
+        // 使用 Math.atan 计算反正切值（以弧度为单位）
+        var angleInRadians = Math.atan(oppositeSideLength / adjacentSideLength);
+
+        // 将弧度转换为角度
+        var angleInDegrees = angleInRadians * (180 / Math.PI);
+
+        return angleInDegrees;
+      }
+
+      function calculateThirdSide(height, width) {
+        // 使用勾股定理计算第三边长度
+        var hypotenuse = Math.sqrt(Math.pow(height, 2) - Math.pow(width, 2));
+
+        return hypotenuse;
+      }
+
+      function calcDegrees(height, width) {
+        return (
+          90 - calculateAngle(calculateThirdSide(height, width / 2), width / 2)
+        );
+      }
+
+      function calculateHypotenuse(height, bottom) {
+        // 使用勾股定理计算斜边长度
+        var hypotenuse = Math.sqrt(Math.pow(height, 2) + Math.pow(bottom, 2));
+
+        return hypotenuse;
+      }
+
+      // 金字塔形
+      const pyramid = {
+        height: 400,
+        width: 200,
+      };
+
+      // 斜面高度
+      const slantHeight = calculateHypotenuse(
+        pyramid.height,
+        pyramid.width / 2
+      );
+      // 斜面斜边长度
+      const hypotenuseLength = calculateHypotenuse(
+        slantHeight,
+        pyramid.width / 2
+      );
+      // 倾斜角度
+      const slantDegrees = 90 - calculateAngle(slantHeight, pyramid.width / 2);
+
+      // 梯形
+      const trapezoidal = {
+        height: 40,
+      };
+
+      // 高度比例
+      const ratio = trapezoidal.height / pyramid.height;
+
+      const calcHypotenuseLength = hypotenuseLength * ratio;
+
+      const trapezoidalWidth = pyramid.width * (1 - ratio);
+      const topOffset = (pyramid.width / 2) * (1 - ratio) - slantHeight * ratio;
+
+      const target = document.getElementById("pyramid");
+
+      target.style.setProperty(
+        "--pyramid-trapezoidal-top-offset",
+        `${topOffset}`
+      );
+      target.style.setProperty("--pyramid-degrees", `${slantDegrees}`);
+      target.style.setProperty("--pyramid-width", `${pyramid.width}`);
+      target.style.setProperty(
+        "--pyramid-hypotenuse-length",
+        `${calcHypotenuseLength}`
+      );
+      target.style.setProperty("--pyramid-height", `${pyramid.height}`);
+      target.style.setProperty("--pyramid-slant-height", `${slantHeight}`);
+      target.style.setProperty(
+        "--pyramid-trapezoidal-height",
+        `${trapezoidal.height}`
+      );
+    </script>
+    <style>
+      #container {
+        margin-top: 200px;
+        perspective: 500px;
+        perspective-origin: 50% 50%;
+      }
+      #pyramid {
+        /* 倾斜角度 */
+        --pyramid-degrees: 30;
+        /* 底边长度 */
+        --pyramid-width: 200;
+        /* 斜边长度 */
+        --pyramid-hypotenuse-length: 200;
+
+        /* 金字塔高度 */
+        --pyramid-height: 200;
+        /* 梯形金字塔高度，低于金字塔高度时显示 */
+        --pyramid-trapezoidal-height: 200;
+
+        --pyramid-trapezoidal-ratio: calc(
+          var(--pyramid-trapezoidal-height) / var(--pyramid-height)
+        );
+
+        --pyramid-trapezoidal-width: calc(
+          (1 - var(--pyramid-trapezoidal-ratio)) * var(--pyramid-width)
+        );
+
+        --pyramid-use-width: calc(var(--pyramid-width) * 1px);
+        --pyramid-use-height: calc(var(--pyramid-height) * 1px);
+
+        --pyramid-use-trapezoidal-width: calc(
+          var(--pyramid-trapezoidal-width) * 1px
+        );
+        --pyramid-use-trapezoidal-height: calc(
+          var(--pyramid-trapezoidal-height) * 1px
+        );
+        --pyramid-use-hypotenuse-length: calc(
+          var(--pyramid-hypotenuse-length) * 1px
+        );
+
+        --pyramid-use-border-side-width: calc(
+          (var(--pyramid-trapezoidal-ratio) * var(--pyramid-width) / 2) * 1px
+        );
+        --pyramid-use-offset: calc(var(--pyramid-width) / 2 * 1px);
+        --pyramid-use-rotate: calc(1deg * var(--pyramid-degrees));
+
+        position: relative;
+        width: var(--pyramid-use-width);
+        height: var(--pyramid-use-hypotenuse-length);
+        margin: 0 auto;
+        transform-style: preserve-3d;
+        transform: rotateY(70deg);
+      }
+      .face {
+        position: absolute;
+        bottom: 0;
+        width: var(--pyramid-use-width);
+        height: 0;
+        border-left: var(--pyramid-use-border-side-width) solid transparent;
+        border-right: var(--pyramid-use-border-side-width) solid transparent;
+        text-align: center;
+        line-height: var(--pyramid-use-hypotenuse-length);
+        transform-origin: 50% 100%;
+        box-sizing: border-box;
+      }
+      #face-a {
+        transform: translateZ(var(--pyramid-use-offset))
+          rotateX(var(--pyramid-use-rotate));
+        border-bottom: var(--pyramid-use-hypotenuse-length) solid
+          rgba(255, 0, 0, 0.5);
+      }
+      #face-b {
+        transform: rotateY(90deg) translateZ(var(--pyramid-use-offset))
+          rotateX(var(--pyramid-use-rotate));
+        border-bottom: var(--pyramid-use-hypotenuse-length) solid
+          rgba(0, 255, 0, 0.5);
+      }
+      #face-c {
+        transform: rotateY(180deg) translateZ(var(--pyramid-use-offset))
+          rotateX(var(--pyramid-use-rotate));
+        border-bottom: var(--pyramid-use-hypotenuse-length) solid
+          rgba(0, 0, 255, 0.5);
+      }
+      #face-d {
+        transform: rotateY(-90deg) translateZ(var(--pyramid-use-offset))
+          rotateX(var(--pyramid-use-rotate));
+        border-bottom: var(--pyramid-use-hypotenuse-length) solid
+          rgba(255, 255, 0, 0.5);
+      }
+
+      .base {
+        transform: rotateX(-90deg) translateZ(var(--pyramid-use-offset));
+        position: absolute;
+        background: rgba(255, 0, 0, 0.5);
+        text-align: center;
+        line-height: var(--pyramid-use-width);
+        width: var(--pyramid-use-width);
+        height: var(--pyramid-use-width);
+        bottom: 0;
+      }
+      #face-e {
+        background: rgba(255, 0, 0, 0.5);
+      }
+      #face-t {
+        left: 50%;
+        margin-left: calc(var(--pyramid-use-trapezoidal-width) / 2 * -1);
+        transform: rotateX(-90deg)
+          translateZ(calc((var(--pyramid-trapezoidal-top-offset)) * 1px));
+        background: rgba(255, 0, 0, 0.5);
+        width: var(--pyramid-use-trapezoidal-width);
+        height: var(--pyramid-use-trapezoidal-width);
+        overflow: hidden;
+      }
+
+      .animate {
+        animation: spinning 6s infinite linear;
+      }
+      @keyframes spinning {
+        from {
+          transform: rotateY(0deg);
+        }
+        to {
+          transform: rotateY(360deg);
+        }
+      }
+    </style>
+  </body>
+</html>
