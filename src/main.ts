@@ -8,6 +8,16 @@ const gp = new GradingPyramid("#app", {
   gradesNumber: 5,
   gap: 10,
   perspective: 2000,
+  toolbar: true,
 });
 
-gp.render([{}]);
+gp.render([
+  {},
+  {},
+  {
+    front: { text: "Front" },
+    back: { text: "Back" },
+    left: { text: "Left" },
+    right: { text: "Right" },
+  },
+]);

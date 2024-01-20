@@ -1,14 +1,39 @@
-export type Grade = {
-  label?: string;
-  color?: string;
-};
+type Side = "top" | "bottom" | "left" | "right" | "front" | "back";
+
+export type Grade = Partial<
+  Record<
+    Side,
+    {
+      text?: string;
+      color?: string;
+      textColor?: string;
+    }
+  >
+>;
 
 export type GradingPyramidOptions = {
+  // style's working scope, for multiple instances
+  scope?: string;
+
+  // how many grades need
   gradesNumber?: number;
   perspective?: number;
+
+  // whole height & width
   height?: number;
   width?: number;
+
+  // gap of each grade
   gap?: number;
+
+  baseGrade?: Grade;
+
+  // auto play animation
+  autoPlay?: boolean;
+  // animation speed: ms
+  speed?: number;
+
+  toolbar?: boolean;
 };
 
 export default class GradingPyramid {
@@ -27,35 +52,87 @@ export default class GradingPyramid {
 
     this.target = target;
 
-    const { height, width, gap, gradesNumber, perspective } = {
+    const {
+      autoPlay,
+      speed,
+      baseGrade,
+      scope,
+      height,
+      width,
+      gap,
+      gradesNumber,
+      perspective,
+      toolbar,
+    } = {
       ...this.defaultOptions,
       ...options,
     };
 
     this.grades = Array(gradesNumber).fill({});
 
+    this.scope = scope;
     this.perspective = perspective;
     this.height = height;
     this.width = width;
     this.gap = gap;
+    this.baseGrade = baseGrade;
+    this.autoPlay = autoPlay;
+    this.speed = speed;
+    this.paused = !this.autoPlay;
+    this.toolbar = toolbar;
   }
 
   defaultOptions: Required<GradingPyramidOptions> = {
+    baseGrade: {
+      front: { color: "rgba(120, 120, 120, 0.35)" },
+      back: { color: "rgba(120, 120, 120, 0.35)" },
+      left: { color: "rgba(220, 220, 220, 0.35)" },
+      right: { color: "rgba(220, 220, 220, 0.35)" },
+      top: { color: "rgba(20, 0, 250, 0.55)" },
+      bottom: { color: "rgba(20, 0, 250, 0.55)" },
+    },
+    autoPlay: true,
+    speed: 6000,
+    scope: "default",
     gap: 10,
     height: 300,
     width: 200,
     gradesNumber: 1,
     perspective: 1000,
+    toolbar: true,
   };
 
   private target: Element;
 
+  public readonly baseGrade: Grade;
+  public readonly scope: string;
   public readonly perspective: number;
   public readonly height: number;
   public readonly width: number;
   public readonly gap: number;
+  public readonly autoPlay: boolean;
+  public readonly speed: number;
+  public readonly toolbar: boolean;
 
   private grades: Grade[] = [];
+
+  private paused: boolean;
+
+  public play(): void {
+    document.querySelectorAll(this.cls("grade", true)).forEach((el) => {
+      const target = el as HTMLElement;
+      target.style.animationPlayState = "running";
+    });
+    this.paused = false;
+  }
+
+  public pause(): void {
+    document.querySelectorAll(this.cls("grade", true)).forEach((el) => {
+      const target = el as HTMLElement;
+      target.style.animationPlayState = "paused";
+    });
+    this.paused = true;
+  }
 
   public render(custom?: Grade[]): void {
     const grades = this.grades.map((grade, i) =>
@@ -64,6 +141,8 @@ export default class GradingPyramid {
 
     const wrapper = document.createElement("article");
     wrapper.classList.add(this.cls("wrapper"));
+
+    const list = [];
 
     for (let i = 0; i < grades.length; i++) {
       const grade = grades[i];
@@ -78,53 +157,86 @@ export default class GradingPyramid {
         margin: i ? this.gap : 0,
       };
 
-      wrapper.append(
-        this.computeGrade({ ...grade, pyramid, trapezoidal }, this.gradeDom())
+      list.push(
+        this.computeGrade({ pyramid, trapezoidal }, this.gradeDom(grade, i))
       );
     }
 
+    wrapper.append(...list);
+
+    this.toolbar && wrapper.append(this.toolbarDom());
+
     this.target.append(wrapper);
 
-    if (!document.head.querySelector("style[data-pyramid]")) {
+    if (!document.head.querySelector(`style[data-pyramid="${this.scope}"]`)) {
       document.head.append(this.style());
     }
   }
 
-  private gradeDom(): HTMLElement {
+  private toolbarDom(): HTMLElement {
+    const wrap = document.createElement("nav");
+    wrap.classList.add(this.cls("toolbar"));
+
+    const button = document.createElement("button");
+    button.classList.add(this.cls("play"));
+    button.innerText = this.paused ? "▶️" : "⏸️";
+
+    button.addEventListener("click", () => {
+      !this.paused ? this.pause() : this.play();
+      button.innerText = this.paused ? "▶️" : "⏸️";
+    });
+
+    wrap.append(button);
+
+    return wrap;
+  }
+
+  private gradeDom(grade: Grade, index: number): HTMLElement {
     const wrap = document.createElement("section");
     wrap.classList.add(this.cls("grade"));
+    wrap.style.zIndex = `${this.grades.length - index}`;
+    wrap.style.animationPlayState = this.autoPlay ? "running" : "paused";
 
-    const face = document.createElement("div");
-    face.classList.add(this.cls("face"));
+    const sides = (
+      ["front", "back", "left", "right", "top", "bottom"] as const
+    ).map((type) => {
+      const isBase = ["top", "bottom"].includes(type);
 
-    const base = document.createElement("aside");
-    base.classList.add(this.cls("base"));
+      const side = document.createElement("aside");
 
-    const front = face.cloneNode(true) as Element;
-    front.classList.add(this.cls("front"));
+      side.classList.add(this.cls(isBase ? "base" : "face"));
+      side.classList.add(this.cls("side"));
+      side.classList.add(this.cls(type));
 
-    const back = face.cloneNode(true) as Element;
-    back.classList.add(this.cls("back"));
+      const { color, text, textColor } = {
+        ...this.baseGrade[type],
+        ...grade[type],
+      };
 
-    const left = face.cloneNode(true) as Element;
-    left.classList.add(this.cls("left"));
+      if (isBase) {
+        !!color && (side.style.backgroundColor = color);
+      } else {
+        !!color && (side.style.borderBottomColor = color);
+      }
 
-    const right = face.cloneNode(true) as Element;
-    right.classList.add(this.cls("right"));
+      const span = document.createElement("span");
+      span.classList.add(this.cls("text"));
 
-    const top = base.cloneNode(true) as Element;
-    top.classList.add(this.cls("top"));
+      !!text && (span.textContent = text);
+      !!textColor && (span.style.color = textColor);
 
-    const bottom = base.cloneNode(true) as Element;
-    bottom.classList.add(this.cls("bottom"));
+      side.append(span);
 
-    wrap.append(front, back, left, right, top, bottom);
+      return side;
+    });
+
+    wrap.append(...sides);
 
     return wrap;
   }
 
   private computeGrade(
-    grade: Grade & {
+    options: {
       pyramid?: { height?: number; width?: number };
       trapezoidal?: { height?: number; margin?: number };
     },
@@ -154,7 +266,7 @@ export default class GradingPyramid {
     const pyramid = {
       height: 400,
       width: 200,
-      ...grade.pyramid,
+      ...options.pyramid,
     };
 
     // 斜面高度
@@ -171,13 +283,11 @@ export default class GradingPyramid {
     const trapezoidal = {
       height: 40,
       margin: 5,
-      ...grade.trapezoidal,
+      ...options.trapezoidal,
     };
 
     // 高度比例
     const ratio = trapezoidal.height / pyramid.height;
-
-    const calcHypotenuseLength = hypotenuseLength * ratio;
 
     const trapezoidalTopOffset =
       (pyramid.width / 2) * (1 - ratio) - slantHeight * ratio;
@@ -191,7 +301,7 @@ export default class GradingPyramid {
     target.style.setProperty("--pyramid-width", `${pyramid.width}`);
     target.style.setProperty(
       "--pyramid-hypotenuse-length",
-      `${calcHypotenuseLength}`
+      `${hypotenuseLength * ratio}`
     );
     target.style.setProperty("--pyramid-height", `${pyramid.height}`);
     target.style.setProperty("--pyramid-slant-height", `${slantHeight}`);
@@ -207,19 +317,20 @@ export default class GradingPyramid {
     return target;
   }
 
-  private cls(name: string): string {
-    return `pyramid-${name}`;
+  private cls(name: string, dot?: boolean): string {
+    return `${dot ? "." : ""}pyramid-${name}-${this.scope}`;
   }
 
   private style(): Element {
     const style = document.createElement("style");
 
-    style.dataset.pyramid = "";
+    style.dataset.pyramid = this.scope;
 
     style.innerHTML = `
 .${this.cls("wrapper")} {
   perspective: ${this.perspective}px;
   perspective-origin: 50% 50%;
+  position: relative;
 }
 .${this.cls("grade")} {
   /* 倾斜角度 */
@@ -286,7 +397,7 @@ export default class GradingPyramid {
   border-bottom: var(--pyramid-use-hypotenuse-length) solid
     rgba(255, 0, 0, 0.5);
 }
-.${this.cls("left")} {
+.${this.cls("right")} {
   transform: rotateY(90deg) translateZ(var(--pyramid-use-offset))
     rotateX(var(--pyramid-use-rotate));
   border-bottom: var(--pyramid-use-hypotenuse-length) solid
@@ -298,7 +409,7 @@ export default class GradingPyramid {
   border-bottom: var(--pyramid-use-hypotenuse-length) solid
     rgba(0, 0, 255, 0.5);
 }
-.${this.cls("right")} {
+.${this.cls("left")} {
   transform: rotateY(-90deg) translateZ(var(--pyramid-use-offset))
     rotateX(var(--pyramid-use-rotate));
   border-bottom: var(--pyramid-use-hypotenuse-length) solid
@@ -329,16 +440,54 @@ export default class GradingPyramid {
   overflow: hidden;
 }
 
-.${this.cls("grade")} {
-  animation: spinning 6s infinite linear;
+.${this.cls("side")}:hover .${this.cls("text")} {
+  opacity: .8;
 }
-@keyframes spinning {
+.${this.cls("text")} {
+  display: block;
+  opacity: 1;
+  user-select: none;
+}
+
+.${this.cls("grade")} {
+  animation: ${this.cls("spinning")} ${this.speed / 1000}s infinite linear;
+}
+
+@keyframes ${this.cls("spinning")} {
   from {
-    transform: rotateY(0deg);
+    transform: rotateY(45deg);
   }
   to {
-    transform: rotateY(360deg);
+    transform: rotateY(405deg);
   }
+}
+
+.${this.cls("toolbar")} {
+  position: absolute;
+  bottom: -124px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: #f1f1f1;
+  border: 1px solid #d1d1d1;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  padding: 8px 16px;
+  border-radius: 990px;
+  width: 96px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.${this.cls("toolbar")} button {
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  padding: 4px 8px;
+  margin: 0 4px;
+  cursor: pointer;
+  line-height: 1;
+  scale: 1.4;
 }
 `;
 
