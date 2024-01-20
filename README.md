@@ -29,4 +29,4 @@ gp.render([
 ]);
 ```
 
-<video src="./doc/preview.mp4"></video>
+[](./doc/preview.mp4)
