@@ -1,205 +1,344 @@
-type Grade = {
+export type Grade = {
+  label?: string;
   color?: string;
-  text?: string;
 };
 
-type Options = {
-  width?: number;
+export type GradingPyramidOptions = {
+  gradesNumber?: number;
+  perspective?: number;
   height?: number;
-  duration?: number;
+  width?: number;
   gap?: number;
 };
 
 export default class GradingPyramid {
-  constructor(container: string | HTMLElement, options?: Options) {
-    const {
-      width = 200,
-      height = 540,
-      gap = 0,
-      duration = 15,
-    } = { ...options };
-
-    this.container =
-      typeof container === "string"
-        ? document.querySelector(container)
-        : container;
-
-    this.width = width;
-    this.height = height;
-    this.gap = gap;
-    this.duration = duration;
-  }
-
-  width = 0;
-  height = 0;
-  gap = 0;
-
-  container: null | HTMLElement = null;
-  duration = 0;
-
-  render(grades: Grade[]) {
-    let target = this.container;
+  constructor(
+    selectorOrTarget: string | Element,
+    options?: GradingPyramidOptions
+  ) {
+    const target =
+      typeof selectorOrTarget === "string"
+        ? document.querySelector(selectorOrTarget)
+        : selectorOrTarget;
 
     if (!target) {
-      return;
+      throw new Error("Target not found");
     }
 
-    if (!document.head.querySelector(`#${this.__styleId}`)) {
-      document.head.appendChild(this.style());
-    }
+    this.target = target;
 
-    const wrapper = document.createElement("div");
-    wrapper.classList.add(`${this.__styleId}-wrapper`);
+    const { height, width, gap, gradesNumber, perspective } = {
+      ...this.defaultOptions,
+      ...options,
+    };
+
+    this.grades = Array(gradesNumber).fill({});
+
+    this.perspective = perspective;
+    this.height = height;
+    this.width = width;
+    this.gap = gap;
+  }
+
+  defaultOptions: Required<GradingPyramidOptions> = {
+    gap: 10,
+    height: 300,
+    width: 200,
+    gradesNumber: 1,
+    perspective: 1000,
+  };
+
+  private target: Element;
+
+  public readonly perspective: number;
+  public readonly height: number;
+  public readonly width: number;
+  public readonly gap: number;
+
+  private grades: Grade[] = [];
+
+  public render(custom?: Grade[]): void {
+    const grades = this.grades.map((grade, i) =>
+      Object.assign({}, grade, custom?.[i] ?? {})
+    );
+
+    const wrapper = document.createElement("article");
+    wrapper.classList.add(this.cls("wrapper"));
 
     for (let i = 0; i < grades.length; i++) {
       const grade = grades[i];
 
-      const [width, height] = this.calcSize(grades, i);
+      const pyramid = {
+        height: this.height * ((i + 1) / grades.length),
+        width: this.width * ((i + 1) / grades.length) - this.gap,
+      };
 
-      const { color, text } = grade;
+      const trapezoidal = {
+        height: pyramid.height / (1 + i),
+        margin: i ? this.gap : 0,
+      };
 
-      wrapper.appendChild(
-        this.grade({
-          height,
-          width,
-          top: (this.height / grades.length - height + this.gap) * i,
-          color,
-          text,
-        })
+      wrapper.append(
+        this.computeGrade({ ...grade, pyramid, trapezoidal }, this.gradeDom())
       );
     }
 
-    target.appendChild(wrapper);
-  }
+    this.target.append(wrapper);
 
-  private calcSize(grades: Grade[], index: number): [number, number] {
-    if (grades.length === 1) {
-      return [this.width, this.height];
-    } else if (index >= 0) {
-      const h = this.height / grades.length;
-      return [h * (index + 1), h];
-    } else {
-      return [this.width, this.height];
+    if (!document.head.querySelector("style[data-pyramid]")) {
+      document.head.append(this.style());
     }
   }
 
-  grade({
-    width = 0,
-    height = 0,
-    top = 0,
-  }: Grade & { width?: number; height?: number; top?: number }) {
-    const grade = document.createElement("div");
-    grade.classList.add(`${this.__styleId}-grade`);
+  private gradeDom(): HTMLElement {
+    const wrap = document.createElement("section");
+    wrap.classList.add(this.cls("grade"));
 
-    grade.style.width = `${width}px`;
-    grade.style.top = `${top}px`;
+    const face = document.createElement("div");
+    face.classList.add(this.cls("face"));
 
-    const side = document.createElement("div");
-    side.classList.add(`${this.__styleId}-side`);
+    const base = document.createElement("aside");
+    base.classList.add(this.cls("base"));
 
-    side.style.borderWidth = `${height / 4}px`;
-    side.style.borderBottomWidth = `${height}px`;
-    side.style.width = `${width}px`;
-    side.style.height = `${height}px`;
+    const front = face.cloneNode(true) as Element;
+    front.classList.add(this.cls("front"));
 
-    const one = side.cloneNode() as HTMLElement;
+    const back = face.cloneNode(true) as Element;
+    back.classList.add(this.cls("back"));
 
-    const two = side.cloneNode() as HTMLElement;
-    // two.style.transformOrigin = `${width / 2}px 0`;
+    const left = face.cloneNode(true) as Element;
+    left.classList.add(this.cls("left"));
 
-    const three = side.cloneNode() as HTMLElement;
-    // three.style.transformOrigin = `${width / 2}px 0`;
+    const right = face.cloneNode(true) as Element;
+    right.classList.add(this.cls("right"));
 
-    const four = side.cloneNode() as HTMLElement;
-    // four.style.transformOrigin = `${width / 2}px 0`;
+    const top = base.cloneNode(true) as Element;
+    top.classList.add(this.cls("top"));
 
-    const lid = document.createElement("div");
-    const tray = document.createElement("div");
-    tray.classList.add(`${this.__styleId}-tray`);
+    const bottom = base.cloneNode(true) as Element;
+    bottom.classList.add(this.cls("bottom"));
 
-    [one, two, three, four, lid, tray].forEach((el) => {
-      grade.appendChild(el);
-    });
+    wrap.append(front, back, left, right, top, bottom);
 
-    return grade;
+    return wrap;
   }
 
-  __styleId = "__grading_pyramid";
+  private computeGrade(
+    grade: Grade & {
+      pyramid?: { height?: number; width?: number };
+      trapezoidal?: { height?: number; margin?: number };
+    },
+    target: HTMLElement
+  ): HTMLElement {
+    function calculateAngle(
+      oppositeSideLength: number,
+      adjacentSideLength: number
+    ) {
+      // 使用 Math.atan 计算反正切值（以弧度为单位）
+      var angleInRadians = Math.atan(oppositeSideLength / adjacentSideLength);
 
-  style() {
+      // 将弧度转换为角度
+      var angleInDegrees = angleInRadians * (180 / Math.PI);
+
+      return angleInDegrees;
+    }
+
+    function calculateHypotenuse(height: number, bottom: number) {
+      // 使用勾股定理计算斜边长度
+      var hypotenuse = Math.sqrt(Math.pow(height, 2) + Math.pow(bottom, 2));
+
+      return hypotenuse;
+    }
+
+    // 金字塔形
+    const pyramid = {
+      height: 400,
+      width: 200,
+      ...grade.pyramid,
+    };
+
+    // 斜面高度
+    const slantHeight = calculateHypotenuse(pyramid.height, pyramid.width / 2);
+    // 斜面斜边长度
+    const hypotenuseLength = calculateHypotenuse(
+      slantHeight,
+      pyramid.width / 2
+    );
+    // 倾斜角度
+    const slantDegrees = 90 - calculateAngle(slantHeight, pyramid.width / 2);
+
+    // 梯形
+    const trapezoidal = {
+      height: 40,
+      margin: 5,
+      ...grade.trapezoidal,
+    };
+
+    // 高度比例
+    const ratio = trapezoidal.height / pyramid.height;
+
+    const calcHypotenuseLength = hypotenuseLength * ratio;
+
+    const trapezoidalTopOffset =
+      (pyramid.width / 2) * (1 - ratio) - slantHeight * ratio;
+    const trapezoidalSlantHeight = slantHeight * ratio + trapezoidal.margin;
+
+    target.style.setProperty(
+      "--pyramid-trapezoidal-top-offset",
+      `${trapezoidalTopOffset}`
+    );
+    target.style.setProperty("--pyramid-degrees", `${slantDegrees}`);
+    target.style.setProperty("--pyramid-width", `${pyramid.width}`);
+    target.style.setProperty(
+      "--pyramid-hypotenuse-length",
+      `${calcHypotenuseLength}`
+    );
+    target.style.setProperty("--pyramid-height", `${pyramid.height}`);
+    target.style.setProperty("--pyramid-slant-height", `${slantHeight}`);
+    target.style.setProperty(
+      "--pyramid-trapezoidal-slant-height",
+      `${trapezoidalSlantHeight}`
+    );
+    target.style.setProperty(
+      "--pyramid-trapezoidal-height",
+      `${trapezoidal.height}`
+    );
+
+    return target;
+  }
+
+  private cls(name: string): string {
+    return `pyramid-${name}`;
+  }
+
+  private style(): Element {
     const style = document.createElement("style");
 
-    style.id = this.__styleId;
-
-    // const wrapperSize = Math.max(this.width, this.height)
+    style.dataset.pyramid = "";
 
     style.innerHTML = `
-.__grading_pyramid-wrapper {
-    position: relative;
-    height: ${this.height}px;
-    width: ${this.width}px;
+.${this.cls("wrapper")} {
+  perspective: ${this.perspective}px;
+  perspective-origin: 50% 50%;
 }
-.__grading_pyramid-grade {
-    display: flex;
-    margin: auto;
-    width: auto;
-    height: inherit;
-    position: relative;
-    transform-style: preserve-3d;
-    transform: rotateY(326deg) rotateX(2deg) rotateZ(329deg);
+.${this.cls("grade")} {
+  /* 倾斜角度 */
+  --pyramid-degrees: 30;
+  /* 底边长度 */
+  --pyramid-width: 200;
+  /* 斜边长度 */
+  --pyramid-hypotenuse-length: 200;
+
+  /* 金字塔高度 */
+  --pyramid-height: 200;
+  /* 梯形金字塔高度，低于金字塔高度时显示 */
+  --pyramid-trapezoidal-height: 200;
+
+  --pyramid-trapezoidal-ratio: calc(
+    var(--pyramid-trapezoidal-height) / var(--pyramid-height)
+  );
+
+  --pyramid-trapezoidal-width: calc(
+    (1 - var(--pyramid-trapezoidal-ratio)) * var(--pyramid-width)
+  );
+
+  --pyramid-use-width: calc(var(--pyramid-width) * 1px);
+  --pyramid-use-height: calc(var(--pyramid-height) * 1px);
+
+  --pyramid-use-trapezoidal-width: calc(
+    var(--pyramid-trapezoidal-width) * 1px
+  );
+  --pyramid-use-trapezoidal-height: calc(
+    var(--pyramid-trapezoidal-height) * 1px
+  );
+  --pyramid-use-hypotenuse-length: calc(
+    var(--pyramid-hypotenuse-length) * 1px
+  );
+
+  --pyramid-use-border-side-width: calc(
+    (var(--pyramid-trapezoidal-ratio) * var(--pyramid-width) / 2) * 1px
+  );
+  --pyramid-use-offset: calc(var(--pyramid-width) / 2 * 1px);
+  --pyramid-use-rotate: calc(1deg * var(--pyramid-degrees));
+
+  position: relative;
+  width: var(--pyramid-use-width);
+  height: calc(var(--pyramid-trapezoidal-slant-height) * 1px);
+  margin: 0 auto;
+  transform-style: preserve-3d;
+  transform: rotateY(70deg);
 }
-.__grading_pyramid-tray {
-    position: absolute;
-    display: flex;
-    width: ${this.width}px;
-    height: ${this.width}px;
-    background: black;
-    bottom: 0;
-    transform: rotateX(90deg);
+.${this.cls("face")} {
+  position: absolute;
+  bottom: 0;
+  width: var(--pyramid-use-width);
+  height: 0;
+  border-left: var(--pyramid-use-border-side-width) solid transparent;
+  border-right: var(--pyramid-use-border-side-width) solid transparent;
+  text-align: center;
+  line-height: var(--pyramid-use-hypotenuse-length);
+  transform-origin: 50% 100%;
+  box-sizing: border-box;
 }
-.__grading_pyramid-side {
-    width: 100px;
-    height: 0;
-    position: absolute;
-    opacity: 0.7;
-    border-style: solid;
-    border-width: 100px;
-    border-color: transparent;
-    border-bottom-width: 200px;
-    border-top: 0px;
-    box-sizing: border-box;
+.${this.cls("front")} {
+  transform: translateZ(var(--pyramid-use-offset))
+    rotateX(var(--pyramid-use-rotate));
+  border-bottom: var(--pyramid-use-hypotenuse-length) solid
+    rgba(255, 0, 0, 0.5);
 }
-.__grading_pyramid-side:nth-child(1) {
-    transform: rotateY(0deg) rotateX(30deg);
-    transform-origin: bottom;
-    border-bottom-color: green;
+.${this.cls("left")} {
+  transform: rotateY(90deg) translateZ(var(--pyramid-use-offset))
+    rotateX(var(--pyramid-use-rotate));
+  border-bottom: var(--pyramid-use-hypotenuse-length) solid
+    rgba(0, 255, 0, 0.5);
 }
-.__grading_pyramid-side:nth-child(2) {
-    transform-origin: bottom;
-    transform: rotateY(90deg) rotateX(-30deg);
-    border-bottom-color: purple;
+.${this.cls("back")} {
+  transform: rotateY(180deg) translateZ(var(--pyramid-use-offset))
+    rotateX(var(--pyramid-use-rotate));
+  border-bottom: var(--pyramid-use-hypotenuse-length) solid
+    rgba(0, 0, 255, 0.5);
 }
-.__grading_pyramid-side:nth-child(3) {
-    transform-origin: bottom;
-    transform: rotateY(270deg) rotateX(-30deg);
-    border-bottom-color: hotpink;
-}
-.__grading_pyramid-side:nth-child(4) {
-    transform-origin: bottom;
-    transform: rotateY(0deg) rotateX(-30deg);
-    border-bottom-color: yellow;
-}
-@keyframes rotate {
-    from {
-        transform: rotateY(0) rotateX(0deg) rotateZ(0deg);
-    }
-    to {
-        transform: rotateY(360deg) rotateX(0deg) rotateZ(0deg);
-    }
+.${this.cls("right")} {
+  transform: rotateY(-90deg) translateZ(var(--pyramid-use-offset))
+    rotateX(var(--pyramid-use-rotate));
+  border-bottom: var(--pyramid-use-hypotenuse-length) solid
+    rgba(255, 255, 0, 0.5);
 }
 
-.__grading_pyramid-grade {
-    animation: rotate_ ${this.duration}s linear infinite;
+.${this.cls("base")} {
+  transform: rotateX(-90deg) translateZ(var(--pyramid-use-offset));
+  position: absolute;
+  background: rgba(255, 0, 0, 0.5);
+  text-align: center;
+  line-height: var(--pyramid-use-width);
+  width: var(--pyramid-use-width);
+  height: var(--pyramid-use-width);
+  bottom: 0;
+}
+.${this.cls("bottom")} {
+  background: rgba(255, 0, 0, 0.5);
+}
+.${this.cls("top")} {
+  left: 50%;
+  margin-left: calc(var(--pyramid-use-trapezoidal-width) / 2 * -1);
+  transform: rotateX(-90deg)
+    translateZ(calc((var(--pyramid-trapezoidal-top-offset)) * 1px));
+  background: rgba(255, 0, 0, 0.5);
+  width: var(--pyramid-use-trapezoidal-width);
+  height: var(--pyramid-use-trapezoidal-width);
+  overflow: hidden;
+}
+
+.${this.cls("grade")} {
+  animation: spinning 6s infinite linear;
+}
+@keyframes spinning {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
 }
 `;
 
