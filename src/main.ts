@@ -9,6 +9,9 @@ const gp = new GradingPyramid("#app", {
   gap: 10,
   perspective: 2000,
   toolbar: true,
+  onClick(e) {
+    console.log(e);
+  },
 });
 
 gp.render([

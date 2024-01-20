@@ -33,7 +33,10 @@ export type GradingPyramidOptions = {
   // animation speed: ms
   speed?: number;
 
+  // whether show toolbar or not
   toolbar?: boolean;
+
+  onClick?: (event: MouseEvent) => void;
 };
 
 export default class GradingPyramid {
@@ -63,6 +66,7 @@ export default class GradingPyramid {
       gradesNumber,
       perspective,
       toolbar,
+      onClick,
     } = {
       ...this.defaultOptions,
       ...options,
@@ -80,6 +84,7 @@ export default class GradingPyramid {
     this.speed = speed;
     this.paused = !this.autoPlay;
     this.toolbar = toolbar;
+    this.onClick = onClick;
   }
 
   defaultOptions: Required<GradingPyramidOptions> = {
@@ -100,23 +105,26 @@ export default class GradingPyramid {
     gradesNumber: 1,
     perspective: 1000,
     toolbar: true,
+    onClick: () => {},
   };
 
   private target: Element;
 
-  public readonly baseGrade: Grade;
-  public readonly scope: string;
-  public readonly perspective: number;
-  public readonly height: number;
-  public readonly width: number;
-  public readonly gap: number;
-  public readonly autoPlay: boolean;
-  public readonly speed: number;
-  public readonly toolbar: boolean;
+  private readonly baseGrade: Grade;
+  private readonly scope: string;
+  private readonly perspective: number;
+  private readonly height: number;
+  private readonly width: number;
+  private readonly gap: number;
+  private readonly autoPlay: boolean;
+  private readonly speed: number;
+  private readonly toolbar: boolean;
 
   private grades: Grade[] = [];
 
   private paused: boolean;
+
+  private readonly onClick: (e: MouseEvent) => void;
 
   public play(): void {
     document.querySelectorAll(this.cls("grade", true)).forEach((el) => {
@@ -191,11 +199,33 @@ export default class GradingPyramid {
     return wrap;
   }
 
+  private hoverGrade(event: MouseEvent) {
+    !this.paused && this.pause();
+
+    const target = event.target as HTMLElement;
+    target.classList.add(this.cls("-hover"));
+  }
+
+  private leaveGrade(event: MouseEvent) {
+    this.autoPlay && this.play();
+
+    const target = event.target as HTMLElement;
+    target.classList.remove(this.cls("-hover"));
+  }
+
+  private clickGrade(event: MouseEvent) {
+    this.onClick(event);
+  }
+
   private gradeDom(grade: Grade, index: number): HTMLElement {
     const wrap = document.createElement("section");
     wrap.classList.add(this.cls("grade"));
     wrap.style.zIndex = `${this.grades.length - index}`;
     wrap.style.animationPlayState = this.autoPlay ? "running" : "paused";
+
+    wrap.addEventListener("mouseenter", this.hoverGrade.bind(this));
+    wrap.addEventListener("mouseleave", this.leaveGrade.bind(this));
+    wrap.addEventListener("click", this.clickGrade.bind(this));
 
     const sides = (
       ["front", "back", "left", "right", "top", "bottom"] as const
@@ -440,13 +470,14 @@ export default class GradingPyramid {
   overflow: hidden;
 }
 
-.${this.cls("side")}:hover .${this.cls("text")} {
-  opacity: .8;
-}
 .${this.cls("text")} {
   display: block;
   opacity: 1;
   user-select: none;
+}
+
+.${this.cls("grade")}.${this.cls("-hover")} .${this.cls("side")} {
+  opacity: .65;
 }
 
 .${this.cls("grade")} {
