@@ -157,7 +157,7 @@ export type GradingPyramidOptions = {
 
   // auto play animation, default true
   running?: boolean;
-  // animation speed: ms
+  // animation speed: ms, default 6000
   speed?: number;
 
   // hide unnecessary sides
@@ -167,7 +167,7 @@ export type GradingPyramidOptions = {
   toolbar?: boolean;
 
   // handle click event with each grade
-  onClick?: (event: MouseEvent) => void;
+  onClick?: (data: SideEventData, event: MouseEvent) => void;
 };
 ```
 
