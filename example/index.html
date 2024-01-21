@@ -6,16 +6,49 @@
     <title>Example</title>
   </head>
   <body>
+    <div style="margin: 32px 0"></div>
+
     <div id="first"></div>
-    <div id="second"></div>
+
     <script src="../dist/index.umd.cjs"></script>
     <script>
-        const gp = new GradingPyramid("#first");
+      new GradingPyramid("#first");
     </script>
-    <!-- <script type="module">
-      import gg from "https://unpkg.com/grading-pyramid@0.2.0/dist/index.js";
-      const a = new gg("#first");
-    //   a.render();
-    </script> -->
+
+    <div style="margin: 32px 0"></div>
+
+    <div id="second"></div>
+
+    <script type="module">
+      // import GradingPyramid from "https://unpkg.com/grading-pyramid@0.2.1/dist/index.js";
+      import GradingPyramid from "../dist/index.js";
+
+      const gp = new GradingPyramid("#second", {
+        scope: "another",
+        render: false,
+        height: 320,
+        width: 300,
+        gradesNumber: 4,
+        gap: 8,
+        perspective: 2000,
+        toolbar: true,
+        onClick(e) {
+          alert("clicked");
+        },
+      });
+
+      gp.render([
+        {},
+        {},
+        {
+          front: { text: "Front", textColor: 'white', color: "rgba(250, 0, 0, .55)" },
+          back: { text: "Back", textColor: 'white', color: "rgba(250, 0, 0, .55)" },
+          left: { text: "Left", textColor: 'white', color: "rgba(0, 250, 0, .55)" },
+          right: { text: "Right", textColor: 'white', color: "rgba(0, 250, 0, .55)" },
+          bottom: { text: "Bottom", textColor: 'white', color: "rgba(0, 0, 250, .55)" },
+          top: { text: "Top", textColor: 'white', color: "rgba(0, 0, 250, .55)" },
+        },
+      ]);
+    </script>
   </body>
 </html>
