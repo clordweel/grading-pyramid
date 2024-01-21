@@ -3,6 +3,7 @@ import "./style.css";
 import GradingPyramid from "./GradingPyramid";
 
 const gp = new GradingPyramid("#app", {
+  render: false,
   height: 500,
   width: 400,
   gradesNumber: 5,

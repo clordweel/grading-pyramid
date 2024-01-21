@@ -32,8 +32,13 @@ export type GradingPyramidOptions = {
   // style's working scope, for multiple instances
   scope?: string;
 
-  // how many grades need
+  // auto render, default true
+  render?: boolean;
+
+  // how many grades need, default 1
   gradesNumber?: number;
+
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/perspective
   perspective?: number;
 
   // whole height & width
@@ -43,16 +48,18 @@ export type GradingPyramidOptions = {
   // gap of each grade
   gap?: number;
 
+  // base grade style options
   baseGrade?: Grade;
 
-  // auto play animation
-  autoPlay?: boolean;
+  // auto play animation, default true
+  running?: boolean;
   // animation speed: ms
   speed?: number;
 
-  // whether show toolbar or not
+  // whether show toolbar or not, default false
   toolbar?: boolean;
 
+  // handle click event with each grade
   onClick?: (event: MouseEvent) => void;
 };
 
@@ -73,7 +80,8 @@ export default class GradingPyramid {
     this.container = container;
 
     const {
-      autoPlay,
+      render,
+      running,
       speed,
       baseGrade,
       scope,
@@ -91,23 +99,23 @@ export default class GradingPyramid {
 
     this.scope = scope;
     this.baseGrade = baseGrade;
-    this.autoPlay = autoPlay;
+    this.running = running;
     this.onClick = onClick;
 
-    if (!!options) {
-      this.store.set(
-        Object.assign({}, this.store.get(), {
-          paused: !autoPlay,
-          speed,
-          perspective,
-          height,
-          width,
-          gap,
-          gradesNumber,
-          toolbar,
-        })
-      );
-    }
+    this.store.set(
+      Object.assign({}, this.store.get(), {
+        paused: !running,
+        speed,
+        perspective,
+        height,
+        width,
+        gap,
+        gradesNumber,
+        toolbar,
+      })
+    );
+
+    if (render) this.render();
   }
 
   // target parent container element
@@ -117,6 +125,7 @@ export default class GradingPyramid {
   private store = map<Store>();
 
   defaultOptions: Required<GradingPyramidOptions> = {
+    render: true,
     baseGrade: {
       front: { color: "rgba(120, 120, 120, 0.35)" },
       back: { color: "rgba(120, 120, 120, 0.35)" },
@@ -125,21 +134,21 @@ export default class GradingPyramid {
       top: { color: "rgba(20, 0, 250, 0.55)" },
       bottom: { color: "rgba(20, 0, 250, 0.55)" },
     },
-    autoPlay: true,
+    running: true,
     speed: 6000,
     scope: "default",
     gap: 10,
     height: 300,
     width: 200,
     gradesNumber: 1,
-    perspective: 1000,
-    toolbar: true,
+    perspective: 2000,
+    toolbar: false,
     onClick: () => {},
   };
 
   private readonly baseGrade: Grade;
   private readonly scope: string;
-  private readonly autoPlay: boolean;
+  private readonly running: boolean;
   private readonly onClick: (e: MouseEvent) => void;
 
   public play(updateState: boolean = true): void {
@@ -276,7 +285,7 @@ export default class GradingPyramid {
   }
 
   private leaveGrade(event: MouseEvent) {
-    this.autoPlay && this.store.setKey("paused", false);
+    this.running && this.store.setKey("paused", false);
 
     const target = event.target as HTMLElement;
     target.classList.remove(this.cls("-hover"));
@@ -292,7 +301,7 @@ export default class GradingPyramid {
     const wrap = document.createElement("section");
     wrap.classList.add(this.cls("grade"));
     wrap.style.zIndex = `${gradesNumber - index}`;
-    wrap.style.animationPlayState = this.autoPlay ? "running" : "paused";
+    wrap.style.animationPlayState = this.running ? "running" : "paused";
 
     // TODO: maybe should do this on parent container for better performence
     wrap.addEventListener("mouseenter", this.hoverGrade.bind(this));
