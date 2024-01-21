@@ -116,6 +116,14 @@ export default class GradingPyramid {
     );
 
     if (render) this.render();
+
+    listenKeys(this.store, ["paused"], ({ paused }) => {
+      paused ? this.pause(false) : this.play(false);
+    });
+
+    listenKeys(this.store, ["gradesNumber", "gap", "height", "width"], () =>
+      this.rerender()
+    );
   }
 
   // target parent container element
@@ -196,10 +204,6 @@ export default class GradingPyramid {
       grades: customGrades = [],
     } = this.store.get();
 
-    listenKeys(this.store, ["gradesNumber", "gap", "height", "width"], () =>
-      this.rerender()
-    );
-
     const items = Array(gradesNumber)
       .fill({})
       .map((_, i) => customGrades[i] ?? {});
@@ -248,7 +252,6 @@ export default class GradingPyramid {
     playOrPause.innerText = paused ? "▶️" : "⏸️";
 
     listenKeys(this.store, ["paused"], ({ paused }) => {
-      paused ? this.pause(false) : this.play(false);
       playOrPause.innerText = paused ? "▶️" : "⏸️";
     });
 
