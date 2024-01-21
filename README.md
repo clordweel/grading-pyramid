@@ -1,8 +1,8 @@
 # 3D Grading Pyramid
 
-[![npm](https://img.shields.io/npm/v/grading-pyramid)](https://www.npmjs.com/package/grading-pyramid)
+> A simple 3D pyramid shape only use vanilla js & css.
 
-> A simple pyramid shape and only use vanilla js & css.
+[![npm](https://img.shields.io/npm/v/grading-pyramid)](https://www.npmjs.com/package/grading-pyramid)
 
 ## Features
 
@@ -15,22 +15,49 @@
 - [x] simple toolbar
 - [ ] more styles dynamically
 
+## Preview
+
+[https://clordweel.github.io/grading-pyramid/example](https://clordweel.github.io/grading-pyramid/example)
+
+https://github.com/clordweel/grading-pyramid/assets/95267940/23736c82-da05-4752-b903-8e690de0450c
+
 ## Usage
 
 **Install**
 
 ```sh
+# install by pnpm
 pnpm add grading-pyramid
+
+# install by npm
+npm install grading-pyramid
 ```
 
-**Examples**
+**ES Import**
 
 ```js
+// import package
 import GradingPyramid from "grading-pyramid";
 
 // create a one grade pyramid
 new GradingPyramid("#app");
 ```
+
+**CDN Import**
+
+```html
+<body>
+  <!-- ... -->
+  <div id="app"></div>
+
+  <script src="https://unpkg.com/grading-pyramid@0.2.6/dist/index.umd.cjs"></script>
+  <script>
+    new GradingPyramid("#app");
+  </script>
+</body>
+```
+
+## Example
 
 ```ts
 import GradingPyramid from "grading-pyramid";
@@ -42,18 +69,27 @@ const gp = new GradingPyramid(
   "#app",
   // optional, type: GradingPyramidOptions
   {
+    // should be unique, if need multiple pyramid, use this to distinguish
+    scope: "another-one",
+
     height: 500,
     width: 400,
+
     gradesNumber: 5,
     gap: 10,
-    perspective: 2000,
+
+    // show toolbar
     toolbar: true,
-    onClick(e) {
-      console.log(e);
+
+    // @param data { level: number, side: string }
+    // @param event MouseEvent
+    onClick(data, event) {
+      alert(`clicked: ${data.level}-${data.side}`); // such as: clicked: 2-front
     },
   }
 );
 
+// render custom grades
 gp.render([
   {},
   {},
@@ -66,9 +102,17 @@ gp.render([
 ]);
 ```
 
-**Types**
+## Typing
 
 ```ts
+export type SideEventData = {
+  // which one level grade is clicked
+  level: number;
+
+  // clicked side name
+  side: Side;
+};
+
 type Side = "top" | "bottom" | "left" | "right" | "front" | "back";
 
 export type Grade = Partial<
@@ -127,4 +171,19 @@ export type GradingPyramidOptions = {
 };
 ```
 
-https://github.com/clordweel/grading-pyramid/assets/95267940/23736c82-da05-4752-b903-8e690de0450c
+## Build
+
+```bash
+# install dependencies
+pnpm install
+
+# for development
+pnpm dev
+
+# for build
+pnpm build
+```
+
+## Dependencies
+
+[nanostores: A tiny (298 bytes) state manager.](https://github.com/nanostores/nanostores)
