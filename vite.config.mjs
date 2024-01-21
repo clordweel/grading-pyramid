@@ -12,6 +12,9 @@ export default defineConfig({
             name: 'GradingPyramid',
         }
     },
+    define: {
+        'process.env.NODE_ENV': '"production"'
+    },
     plugins: [dts({
         include: ['./src/GradingPyramid.ts'],
         outDir: 'dist',

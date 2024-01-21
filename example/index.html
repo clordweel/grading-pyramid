@@ -8,10 +8,14 @@
   <body>
     <div id="first"></div>
     <div id="second"></div>
-    <script type="module">
+    <script src="../dist/index.umd.cjs"></script>
+    <script>
+        const gp = new GradingPyramid("#first");
+    </script>
+    <!-- <script type="module">
       import gg from "https://unpkg.com/grading-pyramid@0.2.0/dist/index.js";
       const a = new gg("#first");
     //   a.render();
-    </script>
+    </script> -->
   </body>
 </html>
