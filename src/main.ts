@@ -2,7 +2,7 @@ import "./style.css";
 
 import GradingPyramid from "./GradingPyramid";
 
-const gp = new GradingPyramid("#app", {
+const gp = new GradingPyramid(document.querySelector<HTMLElement>("#app")!, {
   render: false,
   height: 500,
   width: 400,
@@ -11,8 +11,9 @@ const gp = new GradingPyramid("#app", {
   perspective: 1500,
   toolbar: true,
   hideSides: ["top"],
-  onClick(e) {
-    console.log(e);
+  speed: 8000,
+  onClick(data, event) {
+    console.log(data, event);
   },
 });
 

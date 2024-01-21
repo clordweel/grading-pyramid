@@ -1,3 +1,7 @@
+export type SideEventData = {
+    level: number;
+    side: Side;
+};
 type Store = {
     paused: boolean;
     speed: number;
@@ -30,7 +34,7 @@ export type GradingPyramidOptions = {
     speed?: number;
     hideSides?: Side[];
     toolbar?: boolean;
-    onClick?: (event: MouseEvent) => void;
+    onClick?: (data: SideEventData, event: MouseEvent) => void;
 };
 export default class GradingPyramid {
     constructor(selectorOrTarget: string | HTMLElement, options?: GradingPyramidOptions);

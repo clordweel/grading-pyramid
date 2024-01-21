@@ -1,5 +1,13 @@
 import { listenKeys, map } from "nanostores";
 
+export type SideEventData = {
+  // which one level grade is clicked
+  level: number;
+
+  // clicked side name
+  side: Side;
+};
+
 type Store = {
   paused: boolean;
   speed: number;
@@ -71,7 +79,7 @@ export type GradingPyramidOptions = {
   toolbar?: boolean;
 
   // handle click event with each grade
-  onClick?: (event: MouseEvent) => void;
+  onClick?: (data: SideEventData, event: MouseEvent) => void;
 };
 
 export default class GradingPyramid {
@@ -173,7 +181,7 @@ export default class GradingPyramid {
   private readonly baseGrade: Grade;
   private readonly scope: string;
   private readonly running: boolean;
-  private readonly onClick: (e: MouseEvent) => void;
+  private readonly onClick: (data: SideEventData, event: MouseEvent) => void;
 
   public play(updateState: boolean = true): void {
     document.querySelectorAll(this.cls("grade", true)).forEach((el) => {
@@ -224,8 +232,8 @@ export default class GradingPyramid {
       .fill({})
       .map((_, i) => customGrades[i] ?? {});
 
-    const wrapper = document.createElement("article");
-    wrapper.classList.add(this.cls("shape"));
+    const wrapperElement = document.createElement("article");
+    wrapperElement.classList.add(this.cls("shape"));
 
     const elements: HTMLElement[] = [];
 
@@ -247,11 +255,11 @@ export default class GradingPyramid {
       );
     }
 
-    wrapper.append(...elements);
+    wrapperElement.append(...elements);
 
-    toolbar && wrapper.append(this.toolbarDom());
+    toolbar && wrapperElement.append(this.toolbarDom());
 
-    this.container.append(wrapper);
+    this.container.append(wrapperElement);
 
     if (!document.head.querySelector(`style[data-pyramid="${this.scope}"]`)) {
       document.head.append(this.style());
@@ -261,8 +269,8 @@ export default class GradingPyramid {
   private toolbarDom(): HTMLElement {
     const { paused } = this.store.get();
 
-    const wrap = document.createElement("nav");
-    wrap.classList.add(this.cls("toolbar"));
+    const wrapElement = document.createElement("nav");
+    wrapElement.classList.add(this.cls("toolbar"));
 
     const playOrPause = document.createElement("button");
     playOrPause.innerText = paused ? "▶️" : "⏸️";
@@ -289,9 +297,9 @@ export default class GradingPyramid {
       false
     );
 
-    wrap.append(playOrPause, gradesNumberInput);
+    wrapElement.append(playOrPause, gradesNumberInput);
 
-    return wrap;
+    return wrapElement;
   }
 
   private hoverGrade(event: MouseEvent) {
@@ -310,66 +318,69 @@ export default class GradingPyramid {
     target.classList.remove(this.cls("-hover"));
   }
 
-  private clickGrade(event: MouseEvent) {
-    this.onClick(event);
+  private clickGrade(data: SideEventData, event: MouseEvent) {
+    this.onClick(data, event);
   }
 
   private gradeDom(grade: Grade, index: number): HTMLElement {
     const { gradesNumber, hideSides } = this.store.get();
 
-    const wrap = document.createElement("section");
-    wrap.classList.add(this.cls("grade"));
-    wrap.style.zIndex = `${gradesNumber - index}`;
-    wrap.style.animationPlayState = this.running ? "running" : "paused";
+    const wrapElement = document.createElement("section");
+    wrapElement.classList.add(this.cls("grade"));
+    wrapElement.style.zIndex = `${gradesNumber - index}`;
+    wrapElement.style.animationPlayState = this.running ? "running" : "paused";
 
     // TODO: maybe should do this on parent container for better performence
-    wrap.addEventListener("mouseenter", this.hoverGrade.bind(this));
-    wrap.addEventListener("mouseleave", this.leaveGrade.bind(this));
-
-    wrap.addEventListener("click", this.clickGrade.bind(this));
+    wrapElement.addEventListener("mouseenter", this.hoverGrade.bind(this));
+    wrapElement.addEventListener("mouseleave", this.leaveGrade.bind(this));
 
     const sides = (
       ["front", "back", "left", "right", "top", "bottom"] as const
-    ).map((type) => {
+    ).map((side) => {
       const { color, text, textColor, hide } = {
-        ...this.baseGrade[type],
-        ...grade[type],
+        ...this.baseGrade[side],
+        ...grade[side],
       };
 
       if (typeof hide === "boolean" && hide) {
         return "";
       }
 
-      if (hideSides.includes(type)) return "";
+      if (hideSides.includes(side)) return "";
 
-      const isBase = ["top", "bottom"].includes(type);
+      const isBase = ["top", "bottom"].includes(side);
 
-      const side = document.createElement("aside");
+      const sideElement = document.createElement("aside");
 
-      side.classList.add(this.cls(isBase ? "base" : "face"));
-      side.classList.add(this.cls("side"));
-      side.classList.add(this.cls(type));
+      sideElement.addEventListener(
+        "click",
+        this.clickGrade.bind(this, { side, level: index + 1 })
+      );
+
+      sideElement.classList.add(this.cls(isBase ? "base" : "face"));
+      sideElement.classList.add(this.cls("side"));
+      sideElement.classList.add(this.cls(side));
 
       if (isBase) {
-        !!color && (side.style.backgroundColor = color);
+        !!color && (sideElement.style.backgroundColor = color);
       } else {
-        !!color && (side.style.borderBottomColor = color);
+        !!color && (sideElement.style.borderBottomColor = color);
       }
 
-      const span = document.createElement("span");
-      span.classList.add(this.cls("text"));
+      const spanElement = document.createElement("span");
+      spanElement.classList.add(this.cls("text"));
 
-      !!text && (span.textContent = text);
-      !!textColor && (span.style.color = textColor);
+      !!text && (spanElement.textContent = text);
+      !!textColor && (spanElement.style.color = textColor);
 
-      side.append(span);
+      sideElement.append(spanElement);
 
-      return side;
+      return sideElement;
     });
 
-    wrap.append(...sides);
+    wrapElement.append(...sides);
 
-    return wrap;
+    return wrapElement;
   }
 
   private computeGrade(

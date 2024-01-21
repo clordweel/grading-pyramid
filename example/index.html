@@ -32,8 +32,8 @@
         gap: 8,
         perspective: 2000,
         toolbar: true,
-        onClick(e) {
-          alert("clicked");
+        onClick(data) {
+          alert(`clicked: ${data.level}-${data.side}`);
         },
       });
 
@@ -41,12 +41,36 @@
         {},
         {},
         {
-          front: { text: "Front", textColor: 'white', color: "rgba(250, 0, 0, .55)" },
-          back: { text: "Back", textColor: 'white', color: "rgba(250, 0, 0, .55)" },
-          left: { text: "Left", textColor: 'white', color: "rgba(0, 250, 0, .55)" },
-          right: { text: "Right", textColor: 'white', color: "rgba(0, 250, 0, .55)" },
-          bottom: { text: "Bottom", textColor: 'white', color: "rgba(0, 0, 250, .55)" },
-          top: { text: "Top", textColor: 'white', color: "rgba(0, 0, 250, .55)" },
+          front: {
+            text: "Front",
+            textColor: "white",
+            color: "rgba(250, 0, 0, .55)",
+          },
+          back: {
+            text: "Back",
+            textColor: "white",
+            color: "rgba(250, 0, 0, .55)",
+          },
+          left: {
+            text: "Left",
+            textColor: "white",
+            color: "rgba(0, 250, 0, .55)",
+          },
+          right: {
+            text: "Right",
+            textColor: "white",
+            color: "rgba(0, 250, 0, .55)",
+          },
+          bottom: {
+            text: "Bottom",
+            textColor: "white",
+            color: "rgba(0, 0, 250, .55)",
+          },
+          top: {
+            text: "Top",
+            textColor: "white",
+            color: "rgba(0, 0, 250, .55)",
+          },
         },
       ]);
     </script>
