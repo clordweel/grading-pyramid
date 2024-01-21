@@ -12,6 +12,8 @@ type Store = {
   width: number;
   gap: number;
 
+  hideSides: Side[];
+
   toolbar: boolean;
 };
 
@@ -21,9 +23,15 @@ export type Grade = Partial<
   Record<
     Side,
     {
+      // text on the side
       text?: string;
-      color?: string;
       textColor?: string;
+
+      // the side's color
+      color?: string;
+
+      // whether hide the side or not
+      hide?: boolean;
     }
   >
 >;
@@ -55,6 +63,9 @@ export type GradingPyramidOptions = {
   running?: boolean;
   // animation speed: ms
   speed?: number;
+
+  // hide unnecessary sides
+  hideSides?: Side[];
 
   // whether show toolbar or not, default false
   toolbar?: boolean;
@@ -90,6 +101,7 @@ export default class GradingPyramid {
       gap,
       gradesNumber,
       perspective,
+      hideSides,
       toolbar,
       onClick,
     } = {
@@ -111,6 +123,7 @@ export default class GradingPyramid {
         width,
         gap,
         gradesNumber,
+        hideSides,
         toolbar,
       })
     );
@@ -121,8 +134,10 @@ export default class GradingPyramid {
       paused ? this.pause(false) : this.play(false);
     });
 
-    listenKeys(this.store, ["gradesNumber", "gap", "height", "width"], () =>
-      this.rerender()
+    listenKeys(
+      this.store,
+      ["gradesNumber", "gap", "height", "width", "hideSides"],
+      () => this.rerender()
     );
   }
 
@@ -142,6 +157,7 @@ export default class GradingPyramid {
       top: { color: "rgba(20, 0, 250, 0.55)" },
       bottom: { color: "rgba(20, 0, 250, 0.55)" },
     },
+    hideSides: [],
     running: true,
     speed: 6000,
     scope: "default",
@@ -149,7 +165,7 @@ export default class GradingPyramid {
     height: 300,
     width: 200,
     gradesNumber: 1,
-    perspective: 2000,
+    perspective: 1500,
     toolbar: false,
     onClick: () => {},
   };
@@ -299,7 +315,7 @@ export default class GradingPyramid {
   }
 
   private gradeDom(grade: Grade, index: number): HTMLElement {
-    const { gradesNumber } = this.store.get();
+    const { gradesNumber, hideSides } = this.store.get();
 
     const wrap = document.createElement("section");
     wrap.classList.add(this.cls("grade"));
@@ -315,6 +331,17 @@ export default class GradingPyramid {
     const sides = (
       ["front", "back", "left", "right", "top", "bottom"] as const
     ).map((type) => {
+      const { color, text, textColor, hide } = {
+        ...this.baseGrade[type],
+        ...grade[type],
+      };
+
+      if (typeof hide === "boolean" && hide) {
+        return "";
+      }
+
+      if (hideSides.includes(type)) return "";
+
       const isBase = ["top", "bottom"].includes(type);
 
       const side = document.createElement("aside");
@@ -322,11 +349,6 @@ export default class GradingPyramid {
       side.classList.add(this.cls(isBase ? "base" : "face"));
       side.classList.add(this.cls("side"));
       side.classList.add(this.cls(type));
-
-      const { color, text, textColor } = {
-        ...this.baseGrade[type],
-        ...grade[type],
-      };
 
       if (isBase) {
         !!color && (side.style.backgroundColor = color);
@@ -538,22 +560,22 @@ export default class GradingPyramid {
   position: absolute;
   background: rgba(255, 0, 0, 0.5);
   text-align: center;
-  line-height: var(--pyramid-use-width);
   width: var(--pyramid-use-width);
   height: var(--pyramid-use-width);
   bottom: 0;
 }
 .${this.cls("bottom")} {
   background: rgba(255, 0, 0, 0.5);
+  line-height: var(--pyramid-use-width);
 }
 .${this.cls("top")} {
   left: 50%;
   margin-left: calc(var(--pyramid-use-trapezoidal-width) / 2 * -1);
-  transform: rotateX(-90deg)
-    translateZ(calc((var(--pyramid-trapezoidal-top-offset)) * 1px));
+  transform: rotateX(-90deg) translateZ(calc((var(--pyramid-trapezoidal-top-offset)) * 1px));
   background: rgba(255, 0, 0, 0.5);
   width: var(--pyramid-use-trapezoidal-width);
   height: var(--pyramid-use-trapezoidal-width);
+  line-height: var(--pyramid-use-trapezoidal-width);
   overflow: hidden;
 }
 

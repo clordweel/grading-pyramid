@@ -75,9 +75,15 @@ export type Grade = Partial<
   Record<
     Side,
     {
+      // text on the side
       text?: string;
-      color?: string;
       textColor?: string;
+
+      // the side's color
+      color?: string;
+
+      // whether hide the side or not
+      hide?: boolean;
     }
   >
 >;
@@ -109,6 +115,9 @@ export type GradingPyramidOptions = {
   running?: boolean;
   // animation speed: ms
   speed?: number;
+
+  // hide unnecessary sides
+  hideSides?: Side[];
 
   // whether show toolbar or not, default false
   toolbar?: boolean;

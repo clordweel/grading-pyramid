@@ -8,8 +8,9 @@ const gp = new GradingPyramid("#app", {
   width: 400,
   gradesNumber: 5,
   gap: 10,
-  perspective: 2000,
+  perspective: 1500,
   toolbar: true,
+  hideSides: ["top"],
   onClick(e) {
     console.log(e);
   },
@@ -19,9 +20,15 @@ gp.render([
   {},
   {},
   {
-    front: { text: "Front" },
+    front: { text: "Front", hide: true },
     back: { text: "Back" },
     left: { text: "Left" },
     right: { text: "Right" },
+    bottom: { text: "Bottom" },
+    top: { text: "Top" },
   },
 ]);
+
+// setTimeout(() => {
+//   gp.mutate('hideSides', ['bottom', 'top'])
+// }, 2000);
