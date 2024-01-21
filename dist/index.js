@@ -54,7 +54,7 @@ let p = [], $ = (h, e) => {
   };
   return r;
 };
-function b(h, e, t) {
+function v(h, e, t) {
   let r = /* @__PURE__ */ new Set([...e, void 0]);
   return h.listen((s, i) => {
     r.has(i) && t(s, i);
@@ -133,7 +133,13 @@ class L {
         gradesNumber: u,
         toolbar: y
       })
-    ), s && this.render();
+    ), s && this.render(), v(this.store, ["paused"], ({ paused: b }) => {
+      b ? this.pause(!1) : this.play(!1);
+    }), v(
+      this.store,
+      ["gradesNumber", "gap", "height", "width"],
+      () => this.rerender()
+    );
   }
   play(e = !0) {
     document.querySelectorAll(this.cls("grade", !0)).forEach((t) => {
@@ -166,13 +172,7 @@ class L {
       gap: i,
       toolbar: a,
       grades: d = []
-    } = this.store.get();
-    b(
-      this.store,
-      ["gradesNumber", "gap", "height", "width"],
-      () => this.rerender()
-    );
-    const o = Array(t).fill({}).map((n, u) => d[u] ?? {}), l = document.createElement("article");
+    } = this.store.get(), o = Array(t).fill({}).map((n, u) => d[u] ?? {}), l = document.createElement("article");
     l.classList.add(this.cls("shape"));
     const c = [];
     for (let n = 0; n < o.length; n++) {
@@ -193,8 +193,8 @@ class L {
     const { paused: e } = this.store.get(), t = document.createElement("nav");
     t.classList.add(this.cls("toolbar"));
     const r = document.createElement("button");
-    r.innerText = e ? "▶️" : "⏸️", b(this.store, ["paused"], ({ paused: i }) => {
-      i ? this.pause(!1) : this.play(!1), r.innerText = i ? "▶️" : "⏸️";
+    r.innerText = e ? "▶️" : "⏸️", v(this.store, ["paused"], ({ paused: i }) => {
+      r.innerText = i ? "▶️" : "⏸️";
     }), r.addEventListener("click", () => {
       this.store.setKey("paused", !this.store.get().paused);
     });
@@ -237,8 +237,8 @@ class L {
   }
   computeGrade(e, t) {
     function r(g, y) {
-      var f = Math.atan(g / y), v = f * (180 / Math.PI);
-      return v;
+      var f = Math.atan(g / y), b = f * (180 / Math.PI);
+      return b;
     }
     function s(g, y) {
       var f = Math.sqrt(Math.pow(g, 2) + Math.pow(y, 2));
