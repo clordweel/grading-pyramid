@@ -7,13 +7,15 @@ type Store = {
     height: number;
     width: number;
     gap: number;
+    hideSides: Side[];
     toolbar: boolean;
 };
 type Side = "top" | "bottom" | "left" | "right" | "front" | "back";
 export type Grade = Partial<Record<Side, {
     text?: string;
-    color?: string;
     textColor?: string;
+    color?: string;
+    hide?: boolean;
 }>>;
 export type GradingPyramidOptions = {
     scope?: string;
@@ -26,6 +28,7 @@ export type GradingPyramidOptions = {
     baseGrade?: Grade;
     running?: boolean;
     speed?: number;
+    hideSides?: Side[];
     toolbar?: boolean;
     onClick?: (event: MouseEvent) => void;
 };

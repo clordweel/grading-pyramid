@@ -1,7 +1,7 @@
-var w = Object.defineProperty;
-var x = (h, e, t) => e in h ? w(h, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : h[e] = t;
-var m = (h, e, t) => (x(h, typeof e != "symbol" ? e + "" : e, t), t);
-let p = [], $ = (h, e) => {
+var x = Object.defineProperty;
+var $ = (c, e, t) => e in c ? x(c, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : c[e] = t;
+var y = (c, e, t) => ($(c, typeof e != "symbol" ? e + "" : e, t), t);
+let h = [], z = (c, e) => {
   let t = [], r = {
     get() {
       return r.lc || r.listen(() => {
@@ -9,59 +9,59 @@ let p = [], $ = (h, e) => {
     },
     l: e || 0,
     lc: 0,
-    listen(s, i) {
-      return r.lc = t.push(s, i || r.l) / 2, () => {
-        let a = t.indexOf(s);
-        ~a && (t.splice(a, 2), --r.lc || r.off());
+    listen(i, a) {
+      return r.lc = t.push(i, a || r.l) / 2, () => {
+        let s = t.indexOf(i);
+        ~s && (t.splice(s, 2), --r.lc || r.off());
       };
     },
-    notify(s) {
-      let i = !p.length;
-      for (let a = 0; a < t.length; a += 2)
-        p.push(
-          t[a],
-          t[a + 1],
+    notify(i) {
+      let a = !h.length;
+      for (let s = 0; s < t.length; s += 2)
+        h.push(
+          t[s],
+          t[s + 1],
           r.value,
-          s
+          i
         );
-      if (i) {
-        for (let a = 0; a < p.length; a += 4) {
-          let d;
-          for (let o = a + 1; !d && (o += 4) < p.length; )
-            p[o] < p[a + 1] && (d = p.push(
-              p[a],
-              p[a + 1],
-              p[a + 2],
-              p[a + 3]
+      if (a) {
+        for (let s = 0; s < h.length; s += 4) {
+          let o;
+          for (let d = s + 1; !o && (d += 4) < h.length; )
+            h[d] < h[s + 1] && (o = h.push(
+              h[s],
+              h[s + 1],
+              h[s + 2],
+              h[s + 3]
             ));
-          d || p[a](p[a + 2], p[a + 3]);
+          o || h[s](h[s + 2], h[s + 3]);
         }
-        p.length = 0;
+        h.length = 0;
       }
     },
     off() {
     },
     /* It will be called on last listener unsubscribing.
        We will redefine it in onMount and onStop. */
-    set(s) {
-      r.value !== s && (r.value = s, r.notify());
+    set(i) {
+      r.value !== i && (r.value = i, r.notify());
     },
-    subscribe(s, i) {
-      let a = r.listen(s, i);
-      return s(r.value), a;
+    subscribe(i, a) {
+      let s = r.listen(i, a);
+      return i(r.value), s;
     },
-    value: h
+    value: c
   };
   return r;
 };
-function v(h, e, t) {
+function v(c, e, t) {
   let r = /* @__PURE__ */ new Set([...e, void 0]);
-  return h.listen((s, i) => {
-    r.has(i) && t(s, i);
+  return c.listen((i, a) => {
+    r.has(a) && t(i, a);
   });
 }
-let z = (h = {}) => {
-  let e = $(h);
+let k = (c = {}) => {
+  let e = z(c);
   return e.setKey = function(t, r) {
     typeof r > "u" ? t in e.value && (e.value = { ...e.value }, delete e.value[t], e.notify(t)) : e.value[t] !== r && (e.value = {
       ...e.value,
@@ -69,13 +69,13 @@ let z = (h = {}) => {
     }, e.notify(t));
   }, e;
 };
-class L {
+class E {
   constructor(e, t) {
     // target parent container element
-    m(this, "container");
+    y(this, "container");
     // component's state management
-    m(this, "store", z());
-    m(this, "defaultOptions", {
+    y(this, "store", k());
+    y(this, "defaultOptions", {
       render: !0,
       baseGrade: {
         front: { color: "rgba(120, 120, 120, 0.35)" },
@@ -85,6 +85,7 @@ class L {
         top: { color: "rgba(20, 0, 250, 0.55)" },
         bottom: { color: "rgba(20, 0, 250, 0.55)" }
       },
+      hideSides: [],
       running: !0,
       speed: 6e3,
       scope: "default",
@@ -92,52 +93,54 @@ class L {
       height: 300,
       width: 200,
       gradesNumber: 1,
-      perspective: 2e3,
+      perspective: 1500,
       toolbar: !1,
       onClick: () => {
       }
     });
-    m(this, "baseGrade");
-    m(this, "scope");
-    m(this, "running");
-    m(this, "onClick");
+    y(this, "baseGrade");
+    y(this, "scope");
+    y(this, "running");
+    y(this, "onClick");
     const r = typeof e == "string" ? document.querySelector(e) : e;
     if (!r)
       throw new Error("Target not found");
     this.container = r;
     const {
-      render: s,
-      running: i,
-      speed: a,
-      baseGrade: d,
-      scope: o,
-      height: l,
-      width: c,
+      render: i,
+      running: a,
+      speed: s,
+      baseGrade: o,
+      scope: d,
+      height: p,
+      width: u,
       gap: n,
-      gradesNumber: u,
-      perspective: g,
-      toolbar: y,
-      onClick: f
+      gradesNumber: m,
+      perspective: l,
+      hideSides: g,
+      toolbar: f,
+      onClick: b
     } = {
       ...this.defaultOptions,
       ...t
     };
-    this.scope = o, this.baseGrade = d, this.running = i, this.onClick = f, this.store.set(
+    this.scope = d, this.baseGrade = o, this.running = a, this.onClick = b, this.store.set(
       Object.assign({}, this.store.get(), {
-        paused: !i,
-        speed: a,
-        perspective: g,
-        height: l,
-        width: c,
+        paused: !a,
+        speed: s,
+        perspective: l,
+        height: p,
+        width: u,
         gap: n,
-        gradesNumber: u,
-        toolbar: y
+        gradesNumber: m,
+        hideSides: g,
+        toolbar: f
       })
-    ), s && this.render(), v(this.store, ["paused"], ({ paused: b }) => {
-      b ? this.pause(!1) : this.play(!1);
+    ), i && this.render(), v(this.store, ["paused"], ({ paused: w }) => {
+      w ? this.pause(!1) : this.play(!1);
     }), v(
       this.store,
-      ["gradesNumber", "gap", "height", "width"],
+      ["gradesNumber", "gap", "height", "width", "hideSides"],
       () => this.rerender()
     );
   }
@@ -168,46 +171,46 @@ class L {
     const {
       gradesNumber: t,
       height: r,
-      width: s,
-      gap: i,
-      toolbar: a,
-      grades: d = []
-    } = this.store.get(), o = Array(t).fill({}).map((n, u) => d[u] ?? {}), l = document.createElement("article");
-    l.classList.add(this.cls("shape"));
-    const c = [];
-    for (let n = 0; n < o.length; n++) {
-      const u = o[n], g = {
-        height: r * ((n + 1) / o.length),
-        width: s * ((n + 1) / o.length) - i
-      }, y = {
-        height: g.height / (1 + n),
-        margin: n ? i : 0
+      width: i,
+      gap: a,
+      toolbar: s,
+      grades: o = []
+    } = this.store.get(), d = Array(t).fill({}).map((n, m) => o[m] ?? {}), p = document.createElement("article");
+    p.classList.add(this.cls("shape"));
+    const u = [];
+    for (let n = 0; n < d.length; n++) {
+      const m = d[n], l = {
+        height: r * ((n + 1) / d.length),
+        width: i * ((n + 1) / d.length) - a
+      }, g = {
+        height: l.height / (1 + n),
+        margin: n ? a : 0
       };
-      c.push(
-        this.computeGrade({ pyramid: g, trapezoidal: y }, this.gradeDom(u, n))
+      u.push(
+        this.computeGrade({ pyramid: l, trapezoidal: g }, this.gradeDom(m, n))
       );
     }
-    l.append(...c), a && l.append(this.toolbarDom()), this.container.append(l), document.head.querySelector(`style[data-pyramid="${this.scope}"]`) || document.head.append(this.style());
+    p.append(...u), s && p.append(this.toolbarDom()), this.container.append(p), document.head.querySelector(`style[data-pyramid="${this.scope}"]`) || document.head.append(this.style());
   }
   toolbarDom() {
     const { paused: e } = this.store.get(), t = document.createElement("nav");
     t.classList.add(this.cls("toolbar"));
     const r = document.createElement("button");
-    r.innerText = e ? "▶️" : "⏸️", v(this.store, ["paused"], ({ paused: i }) => {
-      r.innerText = i ? "▶️" : "⏸️";
+    r.innerText = e ? "▶️" : "⏸️", v(this.store, ["paused"], ({ paused: a }) => {
+      r.innerText = a ? "▶️" : "⏸️";
     }), r.addEventListener("click", () => {
       this.store.setKey("paused", !this.store.get().paused);
     });
-    const s = document.createElement("input");
-    return s.type = "number", s.value = this.store.get().gradesNumber.toString(), s.min = "1", s.addEventListener(
+    const i = document.createElement("input");
+    return i.type = "number", i.value = this.store.get().gradesNumber.toString(), i.min = "1", i.addEventListener(
       "change",
-      (i) => {
-        var d;
-        const a = (d = i.target) == null ? void 0 : d.value;
-        this.mutate("gradesNumber", parseInt(a, 10));
+      (a) => {
+        var o;
+        const s = (o = a.target) == null ? void 0 : o.value;
+        this.mutate("gradesNumber", parseInt(s, 10));
       },
       !1
-    ), t.append(r, s), t;
+    ), t.append(r, i), t;
   }
   hoverGrade(e) {
     const { paused: t } = this.store.get();
@@ -220,54 +223,55 @@ class L {
     this.onClick(e);
   }
   gradeDom(e, t) {
-    const { gradesNumber: r } = this.store.get(), s = document.createElement("section");
-    s.classList.add(this.cls("grade")), s.style.zIndex = `${r - t}`, s.style.animationPlayState = this.running ? "running" : "paused", s.addEventListener("mouseenter", this.hoverGrade.bind(this)), s.addEventListener("mouseleave", this.leaveGrade.bind(this)), s.addEventListener("click", this.clickGrade.bind(this));
-    const i = ["front", "back", "left", "right", "top", "bottom"].map((a) => {
-      const d = ["top", "bottom"].includes(a), o = document.createElement("aside");
-      o.classList.add(this.cls(d ? "base" : "face")), o.classList.add(this.cls("side")), o.classList.add(this.cls(a));
-      const { color: l, text: c, textColor: n } = {
-        ...this.baseGrade[a],
-        ...e[a]
+    const { gradesNumber: r, hideSides: i } = this.store.get(), a = document.createElement("section");
+    a.classList.add(this.cls("grade")), a.style.zIndex = `${r - t}`, a.style.animationPlayState = this.running ? "running" : "paused", a.addEventListener("mouseenter", this.hoverGrade.bind(this)), a.addEventListener("mouseleave", this.leaveGrade.bind(this)), a.addEventListener("click", this.clickGrade.bind(this));
+    const s = ["front", "back", "left", "right", "top", "bottom"].map((o) => {
+      const { color: d, text: p, textColor: u, hide: n } = {
+        ...this.baseGrade[o],
+        ...e[o]
       };
-      d ? l && (o.style.backgroundColor = l) : l && (o.style.borderBottomColor = l);
-      const u = document.createElement("span");
-      return u.classList.add(this.cls("text")), c && (u.textContent = c), n && (u.style.color = n), o.append(u), o;
+      if (typeof n == "boolean" && n || i.includes(o))
+        return "";
+      const m = ["top", "bottom"].includes(o), l = document.createElement("aside");
+      l.classList.add(this.cls(m ? "base" : "face")), l.classList.add(this.cls("side")), l.classList.add(this.cls(o)), m ? d && (l.style.backgroundColor = d) : d && (l.style.borderBottomColor = d);
+      const g = document.createElement("span");
+      return g.classList.add(this.cls("text")), p && (g.textContent = p), u && (g.style.color = u), l.append(g), l;
     });
-    return s.append(...i), s;
+    return a.append(...s), a;
   }
   computeGrade(e, t) {
-    function r(g, y) {
-      var f = Math.atan(g / y), b = f * (180 / Math.PI);
+    function r(l, g) {
+      var f = Math.atan(l / g), b = f * (180 / Math.PI);
       return b;
     }
-    function s(g, y) {
-      var f = Math.sqrt(Math.pow(g, 2) + Math.pow(y, 2));
+    function i(l, g) {
+      var f = Math.sqrt(Math.pow(l, 2) + Math.pow(g, 2));
       return f;
     }
-    const i = {
+    const a = {
       height: 400,
       width: 200,
       ...e.pyramid
-    }, a = s(i.height, i.width / 2), d = s(
-      a,
-      i.width / 2
-    ), o = 90 - r(a, i.width / 2), l = {
+    }, s = i(a.height, a.width / 2), o = i(
+      s,
+      a.width / 2
+    ), d = 90 - r(s, a.width / 2), p = {
       height: 40,
       margin: 5,
       ...e.trapezoidal
-    }, c = l.height / i.height, n = i.width / 2 * (1 - c) - a * c, u = a * c + l.margin;
+    }, u = p.height / a.height, n = a.width / 2 * (1 - u) - s * u, m = s * u + p.margin;
     return t.style.setProperty(
       "--pyramid-trapezoidal-top-offset",
       `${n}`
-    ), t.style.setProperty("--pyramid-degrees", `${o}`), t.style.setProperty("--pyramid-width", `${i.width}`), t.style.setProperty(
+    ), t.style.setProperty("--pyramid-degrees", `${d}`), t.style.setProperty("--pyramid-width", `${a.width}`), t.style.setProperty(
       "--pyramid-hypotenuse-length",
-      `${d * c}`
-    ), t.style.setProperty("--pyramid-height", `${i.height}`), t.style.setProperty("--pyramid-slant-height", `${a}`), t.style.setProperty(
+      `${o * u}`
+    ), t.style.setProperty("--pyramid-height", `${a.height}`), t.style.setProperty("--pyramid-slant-height", `${s}`), t.style.setProperty(
       "--pyramid-trapezoidal-slant-height",
-      `${u}`
+      `${m}`
     ), t.style.setProperty(
       "--pyramid-trapezoidal-height",
-      `${l.height}`
+      `${p.height}`
     ), t;
   }
   cls(e, t) {
@@ -370,22 +374,22 @@ class L {
   position: absolute;
   background: rgba(255, 0, 0, 0.5);
   text-align: center;
-  line-height: var(--pyramid-use-width);
   width: var(--pyramid-use-width);
   height: var(--pyramid-use-width);
   bottom: 0;
 }
 .${this.cls("bottom")} {
   background: rgba(255, 0, 0, 0.5);
+  line-height: var(--pyramid-use-width);
 }
 .${this.cls("top")} {
   left: 50%;
   margin-left: calc(var(--pyramid-use-trapezoidal-width) / 2 * -1);
-  transform: rotateX(-90deg)
-    translateZ(calc((var(--pyramid-trapezoidal-top-offset)) * 1px));
+  transform: rotateX(-90deg) translateZ(calc((var(--pyramid-trapezoidal-top-offset)) * 1px));
   background: rgba(255, 0, 0, 0.5);
   width: var(--pyramid-use-trapezoidal-width);
   height: var(--pyramid-use-trapezoidal-width);
+  line-height: var(--pyramid-use-trapezoidal-width);
   overflow: hidden;
 }
 
@@ -455,5 +459,5 @@ class L {
   }
 }
 export {
-  L as default
+  E as default
 };
