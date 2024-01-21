@@ -1,21 +1,56 @@
-# Grading Pyramid
+# 3D Grading Pyramid
 
-> WIP
+> A simple pyramid shape and only use vanilla js & css.
+
+## Features
+
+- [ ] dynamic height & width
+- [x] customizable styles: color, text
+- [x] customizable number of grades
+- [x] customizable gap between grades
+- [x] animation speed & control
+- [x] some mouse interactions
+- [x] simple toolbar
+- [ ] more styles dynamically
+
+## Usage
+
+**Install**
+
+```sh
+pnpm add grading-pyramid
+```
+
+**Examples**
+
+```js
+import GradingPyramid from "grading-pyramid";
+
+// create a one grade pyramid
+new GradingPyramid("#app");
+```
 
 ```ts
-import GradingPyramid from "./GradingPyramid";
+import GradingPyramid from "grading-pyramid";
 
-const gp = new GradingPyramid("#app", {
-  height: 500,
-  width: 400,
-  gradesNumber: 5,
-  gap: 10,
-  perspective: 2000,
-  toolbar: true,
-  onClick(e) {
-    console.log(e);
-  },
-});
+// create a pyramid have five grades and gap is 10px
+const gp = new GradingPyramid(
+  // target parent container selector
+  // or document.querySelector("#app")
+  "#app",
+  // optional, type: GradingPyramidOptions
+  {
+    height: 500,
+    width: 400,
+    gradesNumber: 5,
+    gap: 10,
+    perspective: 2000,
+    toolbar: true,
+    onClick(e) {
+      console.log(e);
+    },
+  }
+);
 
 gp.render([
   {},
@@ -29,7 +64,56 @@ gp.render([
 ]);
 ```
 
+**Types**
 
+```ts
+type Side = "top" | "bottom" | "left" | "right" | "front" | "back";
+
+export type Grade = Partial<
+  Record<
+    Side,
+    {
+      text?: string;
+      color?: string;
+      textColor?: string;
+    }
+  >
+>;
+
+export type GradingPyramidOptions = {
+  // style's working scope, for multiple instances
+  scope?: string;
+
+  // auto render, default true
+  render?: boolean;
+
+  // how many grades need, default 1
+  gradesNumber?: number;
+
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/perspective
+  perspective?: number;
+
+  // whole height & width
+  height?: number;
+  width?: number;
+
+  // gap of each grade
+  gap?: number;
+
+  // base grade style options
+  baseGrade?: Grade;
+
+  // auto play animation, default true
+  running?: boolean;
+  // animation speed: ms
+  speed?: number;
+
+  // whether show toolbar or not, default false
+  toolbar?: boolean;
+
+  // handle click event with each grade
+  onClick?: (event: MouseEvent) => void;
+};
+```
 
 https://github.com/clordweel/grading-pyramid/assets/95267940/23736c82-da05-4752-b903-8e690de0450c
-
