@@ -1,5 +1,7 @@
 # 3D Grading Pyramid
 
+[![npm](https://img.shields.io/npm/v/grading-pyramid)](https://www.npmjs.com/package/grading-pyramid)
+
 > A simple pyramid shape and only use vanilla js & css.
 
 ## Features

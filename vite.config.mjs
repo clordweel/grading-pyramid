@@ -6,9 +6,10 @@ export default defineConfig({
     build: {
         lib: {
             entry: './src/GradingPyramid.ts',
-            formats: ['es'],
+            formats: ['es', 'umd'],
             outDir: 'dist',
             fileName: 'index',
+            name: 'GradingPyramid',
         }
     },
     plugins: [dts({
