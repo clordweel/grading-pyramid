@@ -1,3 +1,20 @@
+import { listenKeys, map } from "nanostores";
+
+type Store = {
+  paused: boolean;
+  speed: number;
+  perspective: number;
+
+  grades: Grade[];
+
+  gradesNumber: number;
+  height: number;
+  width: number;
+  gap: number;
+
+  toolbar: boolean;
+};
+
 type Side = "top" | "bottom" | "left" | "right" | "front" | "back";
 
 export type Grade = Partial<
@@ -41,19 +58,19 @@ export type GradingPyramidOptions = {
 
 export default class GradingPyramid {
   constructor(
-    selectorOrTarget: string | Element,
+    selectorOrTarget: string | HTMLElement,
     options?: GradingPyramidOptions
   ) {
-    const target =
+    const container =
       typeof selectorOrTarget === "string"
-        ? document.querySelector(selectorOrTarget)
+        ? document.querySelector<HTMLElement>(selectorOrTarget)
         : selectorOrTarget;
 
-    if (!target) {
+    if (!container) {
       throw new Error("Target not found");
     }
 
-    this.target = target;
+    this.container = container;
 
     const {
       autoPlay,
@@ -72,20 +89,32 @@ export default class GradingPyramid {
       ...options,
     };
 
-    this.grades = Array(gradesNumber).fill({});
-
     this.scope = scope;
-    this.perspective = perspective;
-    this.height = height;
-    this.width = width;
-    this.gap = gap;
     this.baseGrade = baseGrade;
     this.autoPlay = autoPlay;
-    this.speed = speed;
-    this.paused = !this.autoPlay;
-    this.toolbar = toolbar;
     this.onClick = onClick;
+
+    if (!!options) {
+      this.store.set(
+        Object.assign({}, this.store.get(), {
+          paused: !autoPlay,
+          speed,
+          perspective,
+          height,
+          width,
+          gap,
+          gradesNumber,
+          toolbar,
+        })
+      );
+    }
   }
+
+  // target parent container element
+  private readonly container: HTMLElement;
+
+  // component's state management
+  private store = map<Store>();
 
   defaultOptions: Required<GradingPyramidOptions> = {
     baseGrade: {
@@ -108,73 +137,92 @@ export default class GradingPyramid {
     onClick: () => {},
   };
 
-  private target: Element;
-
   private readonly baseGrade: Grade;
   private readonly scope: string;
-  private readonly perspective: number;
-  private readonly height: number;
-  private readonly width: number;
-  private readonly gap: number;
   private readonly autoPlay: boolean;
-  private readonly speed: number;
-  private readonly toolbar: boolean;
-
-  private grades: Grade[] = [];
-
-  private paused: boolean;
-
   private readonly onClick: (e: MouseEvent) => void;
 
-  public play(): void {
+  public play(updateState: boolean = true): void {
     document.querySelectorAll(this.cls("grade", true)).forEach((el) => {
       const target = el as HTMLElement;
       target.style.animationPlayState = "running";
     });
-    this.paused = false;
+
+    updateState && this.store.setKey("paused", false);
   }
 
-  public pause(): void {
+  public pause(updateState: boolean = true): void {
     document.querySelectorAll(this.cls("grade", true)).forEach((el) => {
       const target = el as HTMLElement;
       target.style.animationPlayState = "paused";
     });
-    this.paused = true;
+
+    updateState && this.store.setKey("paused", true);
   }
 
-  public render(custom?: Grade[]): void {
-    const grades = this.grades.map((grade, i) =>
-      Object.assign({}, grade, custom?.[i] ?? {})
+  public mutate<K extends keyof Store>(key: K, value: Store[K]) {
+    this.store.setKey(key, value);
+  }
+
+  public prune() {
+    this.container.querySelector(this.cls("shape", true))?.remove();
+  }
+
+  public rerender() {
+    this.prune();
+    this.render();
+  }
+
+  public render(grades?: Grade[]): void {
+    if (grades) {
+      this.store.setKey("grades", grades);
+    }
+
+    const {
+      gradesNumber,
+      height,
+      width,
+      gap,
+      toolbar,
+      grades: customGrades = [],
+    } = this.store.get();
+
+    listenKeys(this.store, ["gradesNumber", "gap", "height", "width"], () =>
+      this.rerender()
     );
 
+    const items = Array(gradesNumber)
+      .fill({})
+      .map((_, i) => customGrades[i] ?? {});
+
     const wrapper = document.createElement("article");
-    wrapper.classList.add(this.cls("wrapper"));
+    wrapper.classList.add(this.cls("shape"));
 
-    const list = [];
+    const elements: HTMLElement[] = [];
 
-    for (let i = 0; i < grades.length; i++) {
-      const grade = grades[i];
+    for (let i = 0; i < items.length; i++) {
+      const grade = items[i];
 
       const pyramid = {
-        height: this.height * ((i + 1) / grades.length),
-        width: this.width * ((i + 1) / grades.length) - this.gap,
+        height: height * ((i + 1) / items.length),
+        width: width * ((i + 1) / items.length) - gap,
       };
 
       const trapezoidal = {
         height: pyramid.height / (1 + i),
-        margin: i ? this.gap : 0,
+        margin: i ? gap : 0,
       };
 
-      list.push(
+      elements.push(
         this.computeGrade({ pyramid, trapezoidal }, this.gradeDom(grade, i))
       );
     }
 
-    wrapper.append(...list);
+    wrapper.append(...elements);
 
-    this.toolbar && wrapper.append(this.toolbarDom());
+    toolbar && wrapper.append(this.toolbarDom());
 
-    this.target.append(wrapper);
+    this.container.append(wrapper);
 
     if (!document.head.querySelector(`style[data-pyramid="${this.scope}"]`)) {
       document.head.append(this.style());
@@ -182,32 +230,53 @@ export default class GradingPyramid {
   }
 
   private toolbarDom(): HTMLElement {
+    const { paused } = this.store.get();
+
     const wrap = document.createElement("nav");
     wrap.classList.add(this.cls("toolbar"));
 
-    const button = document.createElement("button");
-    button.classList.add(this.cls("play"));
-    button.innerText = this.paused ? "▶️" : "⏸️";
+    const playOrPause = document.createElement("button");
+    playOrPause.innerText = paused ? "▶️" : "⏸️";
 
-    button.addEventListener("click", () => {
-      !this.paused ? this.pause() : this.play();
-      button.innerText = this.paused ? "▶️" : "⏸️";
+    listenKeys(this.store, ["paused"], ({ paused }) => {
+      paused ? this.pause(false) : this.play(false);
+      playOrPause.innerText = paused ? "▶️" : "⏸️";
     });
 
-    wrap.append(button);
+    playOrPause.addEventListener("click", () => {
+      this.store.setKey("paused", !this.store.get().paused);
+    });
+
+    const gradesNumberInput = document.createElement("input");
+    gradesNumberInput.type = "number";
+    gradesNumberInput.value = this.store.get().gradesNumber.toString();
+    gradesNumberInput.min = "1";
+
+    gradesNumberInput.addEventListener(
+      "change",
+      (event) => {
+        const num = (event.target as HTMLInputElement)?.value;
+        this.mutate("gradesNumber", parseInt(num, 10));
+      },
+      false
+    );
+
+    wrap.append(playOrPause, gradesNumberInput);
 
     return wrap;
   }
 
   private hoverGrade(event: MouseEvent) {
-    !this.paused && this.pause();
+    const { paused } = this.store.get();
+
+    !paused && this.store.setKey("paused", true);
 
     const target = event.target as HTMLElement;
     target.classList.add(this.cls("-hover"));
   }
 
   private leaveGrade(event: MouseEvent) {
-    this.autoPlay && this.play();
+    this.autoPlay && this.store.setKey("paused", false);
 
     const target = event.target as HTMLElement;
     target.classList.remove(this.cls("-hover"));
@@ -218,13 +287,17 @@ export default class GradingPyramid {
   }
 
   private gradeDom(grade: Grade, index: number): HTMLElement {
+    const { gradesNumber } = this.store.get();
+
     const wrap = document.createElement("section");
     wrap.classList.add(this.cls("grade"));
-    wrap.style.zIndex = `${this.grades.length - index}`;
+    wrap.style.zIndex = `${gradesNumber - index}`;
     wrap.style.animationPlayState = this.autoPlay ? "running" : "paused";
 
+    // TODO: maybe should do this on parent container for better performence
     wrap.addEventListener("mouseenter", this.hoverGrade.bind(this));
     wrap.addEventListener("mouseleave", this.leaveGrade.bind(this));
+
     wrap.addEventListener("click", this.clickGrade.bind(this));
 
     const sides = (
@@ -352,13 +425,15 @@ export default class GradingPyramid {
   }
 
   private style(): Element {
+    const { perspective, speed } = this.store.get();
+
     const style = document.createElement("style");
 
     style.dataset.pyramid = this.scope;
 
     style.innerHTML = `
-.${this.cls("wrapper")} {
-  perspective: ${this.perspective}px;
+.${this.cls("shape")} {
+  perspective: ${perspective}px;
   perspective-origin: 50% 50%;
   position: relative;
 }
@@ -481,7 +556,7 @@ export default class GradingPyramid {
 }
 
 .${this.cls("grade")} {
-  animation: ${this.cls("spinning")} ${this.speed / 1000}s infinite linear;
+  animation: ${this.cls("spinning")} ${speed / 1000}s infinite linear;
 }
 
 @keyframes ${this.cls("spinning")} {
@@ -504,18 +579,30 @@ export default class GradingPyramid {
   box-shadow: 0 1px 3px rgba(0,0,0,.2);
   padding: 8px 16px;
   border-radius: 990px;
-  width: 96px;
-  height: 32px;
+  width: 140px;
+  height: 42px;
   display: flex;
-  justify-content: center;
+  gap: 8px;
+  justify-content: space-between;
   align-items: center;
+}
+.${this.cls("toolbar")} input {
+  border: none;
+  border-radius: 2px;
+  padding: 4px 8px;
+  padding-right: 4px;
+  cursor: pointer;
+  line-height: 1;
+  scale: 1.4;
+  width: 3em;
+  text-align: center;
+  border-radius: 999px;
 }
 .${this.cls("toolbar")} button {
   background: transparent;
   border: none;
   border-radius: 2px;
   padding: 4px 8px;
-  margin: 0 4px;
   cursor: pointer;
   line-height: 1;
   scale: 1.4;
