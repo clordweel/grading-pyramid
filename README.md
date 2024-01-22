@@ -19,7 +19,7 @@
 
 [https://clordweel.github.io/grading-pyramid/example](https://clordweel.github.io/grading-pyramid/example)
 
-https://github.com/clordweel/grading-pyramid/assets/95267940/23736c82-da05-4752-b903-8e690de0450c
+https://github.com/clordweel/grading-pyramid/assets/95267940/da85deb4-c901-4107-8392-608998ef917a
 
 ## Usage
 
