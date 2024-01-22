@@ -48,8 +48,8 @@ export type GradingPyramidOptions = {
   // style's working scope, for multiple instances
   scope?: string;
 
-  // auto render, default true
-  render?: boolean;
+  // immediate render, default true
+  immediate?: boolean;
 
   // how many grades need, default 1
   gradesNumber?: number;
@@ -99,7 +99,7 @@ export default class GradingPyramid {
     this.container = container;
 
     const {
-      render,
+      immediate,
       running,
       speed,
       baseGrade,
@@ -136,7 +136,7 @@ export default class GradingPyramid {
       })
     );
 
-    if (render) this.render();
+    if (immediate) this.render();
 
     listenKeys(this.store, ["paused"], ({ paused }) => {
       paused ? this.pause(false) : this.play(false);
@@ -169,7 +169,7 @@ export default class GradingPyramid {
   private store = map<Store>();
 
   defaultOptions: Required<GradingPyramidOptions> = {
-    render: true,
+    immediate: true,
     baseGrade: {
       front: { color: "rgba(120, 120, 120, 0.35)" },
       back: { color: "rgba(120, 120, 120, 0.35)" },
