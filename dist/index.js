@@ -1,42 +1,42 @@
 var x = Object.defineProperty;
-var $ = (c, t, e) => t in c ? x(c, t, { enumerable: !0, configurable: !0, writable: !0, value: e }) : c[t] = e;
-var y = (c, t, e) => ($(c, typeof t != "symbol" ? t + "" : t, e), e);
-let h = [], z = (c, t) => {
-  let e = [], r = {
+var $ = (c, e, t) => e in c ? x(c, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : c[e] = t;
+var g = (c, e, t) => ($(c, typeof e != "symbol" ? e + "" : e, t), t);
+let d = [], z = (c, e) => {
+  let t = [], r = {
     get() {
       return r.lc || r.listen(() => {
       })(), r.value;
     },
-    l: t || 0,
+    l: e || 0,
     lc: 0,
-    listen(i, a) {
-      return r.lc = e.push(i, a || r.l) / 2, () => {
-        let s = e.indexOf(i);
-        ~s && (e.splice(s, 2), --r.lc || r.off());
+    listen(i, s) {
+      return r.lc = t.push(i, s || r.l) / 2, () => {
+        let a = t.indexOf(i);
+        ~a && (t.splice(a, 2), --r.lc || r.off());
       };
     },
     notify(i) {
-      let a = !h.length;
-      for (let s = 0; s < e.length; s += 2)
-        h.push(
-          e[s],
-          e[s + 1],
+      let s = !d.length;
+      for (let a = 0; a < t.length; a += 2)
+        d.push(
+          t[a],
+          t[a + 1],
           r.value,
           i
         );
-      if (a) {
-        for (let s = 0; s < h.length; s += 4) {
+      if (s) {
+        for (let a = 0; a < d.length; a += 4) {
           let o;
-          for (let d = s + 1; !o && (d += 4) < h.length; )
-            h[d] < h[s + 1] && (o = h.push(
-              h[s],
-              h[s + 1],
-              h[s + 2],
-              h[s + 3]
+          for (let l = a + 1; !o && (l += 4) < d.length; )
+            d[l] < d[a + 1] && (o = d.push(
+              d[a],
+              d[a + 1],
+              d[a + 2],
+              d[a + 3]
             ));
-          o || h[s](h[s + 2], h[s + 3]);
+          o || d[a](d[a + 2], d[a + 3]);
         }
-        h.length = 0;
+        d.length = 0;
       }
     },
     off() {
@@ -46,36 +46,38 @@ let h = [], z = (c, t) => {
     set(i) {
       r.value !== i && (r.value = i, r.notify());
     },
-    subscribe(i, a) {
-      let s = r.listen(i, a);
-      return i(r.value), s;
+    subscribe(i, s) {
+      let a = r.listen(i, s);
+      return i(r.value), a;
     },
     value: c
   };
   return r;
 };
-function v(c, t, e) {
-  let r = /* @__PURE__ */ new Set([...t, void 0]);
-  return c.listen((i, a) => {
-    r.has(a) && e(i, a);
+function v(c, e, t) {
+  let r = /* @__PURE__ */ new Set([...e, void 0]);
+  return c.listen((i, s) => {
+    r.has(s) && t(i, s);
   });
 }
 let E = (c = {}) => {
-  let t = z(c);
-  return t.setKey = function(e, r) {
-    typeof r > "u" ? e in t.value && (t.value = { ...t.value }, delete t.value[e], t.notify(e)) : t.value[e] !== r && (t.value = {
-      ...t.value,
-      [e]: r
-    }, t.notify(e));
-  }, t;
+  let e = z(c);
+  return e.setKey = function(t, r) {
+    typeof r > "u" ? t in e.value && (e.value = { ...e.value }, delete e.value[t], e.notify(t)) : e.value[t] !== r && (e.value = {
+      ...e.value,
+      [t]: r
+    }, e.notify(t));
+  }, e;
 };
-class L {
-  constructor(t, e) {
+class G {
+  constructor(e, t) {
+    // only set once on first mount
+    g(this, "mounted");
     // target parent container element
-    y(this, "container");
+    g(this, "container");
     // component's state management
-    y(this, "store", E());
-    y(this, "defaultOptions", {
+    g(this, "store", E());
+    g(this, "defaultOptions", {
       render: !0,
       baseGrade: {
         front: { color: "rgba(120, 120, 120, 0.35)" },
@@ -98,193 +100,200 @@ class L {
       onClick: () => {
       }
     });
-    y(this, "baseGrade");
-    y(this, "scope");
-    y(this, "running");
-    y(this, "onClick");
-    const r = typeof t == "string" ? document.querySelector(t) : t;
+    g(this, "baseGrade");
+    g(this, "scope");
+    g(this, "running");
+    g(this, "onClick");
+    const r = typeof e == "string" ? document.querySelector(e) : e;
     if (!r)
       throw new Error("Target not found");
     this.container = r;
     const {
       render: i,
-      running: a,
-      speed: s,
+      running: s,
+      speed: a,
       baseGrade: o,
-      scope: d,
-      height: p,
-      width: u,
-      gap: l,
-      gradesNumber: g,
-      perspective: n,
-      hideSides: m,
+      scope: l,
+      height: n,
+      width: p,
+      gap: m,
+      gradesNumber: y,
+      perspective: h,
+      hideSides: u,
       toolbar: f,
       onClick: b
     } = {
       ...this.defaultOptions,
-      ...e
+      ...t
     };
-    this.scope = d, this.baseGrade = o, this.running = a, this.onClick = b, this.store.set(
+    this.scope = l, this.baseGrade = o, this.running = s, this.onClick = b, this.store.set(
       Object.assign({}, this.store.get(), {
-        paused: !a,
-        speed: s,
-        perspective: n,
-        height: p,
-        width: u,
-        gap: l,
-        gradesNumber: g,
-        hideSides: m,
+        paused: !s,
+        speed: a,
+        perspective: h,
+        height: n,
+        width: p,
+        gap: m,
+        gradesNumber: y,
+        hideSides: u,
         toolbar: f
       })
     ), i && this.render(), v(this.store, ["paused"], ({ paused: w }) => {
       w ? this.pause(!1) : this.play(!1);
     }), v(
       this.store,
-      ["gradesNumber", "gap", "height", "width", "hideSides"],
-      () => this.rerender()
+      ["gradesNumber", "gap", "grades", "height", "width", "hideSides"],
+      () => {
+        this.mounted = this.mounted || !!document.querySelector(this.cls("shape", !0)), this.mounted ? (this.prune(), this.mount()) : this.render();
+      }
     );
   }
-  play(t = !0) {
-    document.querySelectorAll(this.cls("grade", !0)).forEach((e) => {
-      const r = e;
+  play(e = !0) {
+    document.querySelectorAll(this.cls("grade", !0)).forEach((t) => {
+      const r = t;
       r.style.animationPlayState = "running";
-    }), t && this.store.setKey("paused", !1);
+    }), e && this.store.setKey("paused", !1);
   }
-  pause(t = !0) {
-    document.querySelectorAll(this.cls("grade", !0)).forEach((e) => {
-      const r = e;
+  pause(e = !0) {
+    document.querySelectorAll(this.cls("grade", !0)).forEach((t) => {
+      const r = t;
       r.style.animationPlayState = "paused";
-    }), t && this.store.setKey("paused", !0);
+    }), e && this.store.setKey("paused", !0);
   }
-  mutate(t, e) {
-    this.store.setKey(t, e);
+  mutate(e, t) {
+    this.store.setKey(e, t);
+  }
+  setGrades(e) {
+    this.store.setKey("grades", e);
+  }
+  setGradesNumber(e) {
+    this.store.setKey("gradesNumber", e);
   }
   prune() {
-    var t;
-    (t = this.container.querySelector(this.cls("shape", !0))) == null || t.remove();
+    var e;
+    (e = this.container.querySelector(this.cls("shape", !0))) == null || e.remove();
   }
-  rerender() {
-    this.prune(), this.render();
+  mount() {
+    const { toolbar: e } = this.store.get(), t = this.render();
+    e && t.append(this.toolbarDom()), this.container.append(t), document.head.querySelector(`style[data-pyramid="${this.scope}"]`) || document.head.append(this.style());
   }
-  render(t) {
-    t && this.store.setKey("grades", t);
+  render() {
     const {
       gradesNumber: e,
-      height: r,
-      width: i,
-      gap: a,
-      toolbar: s,
-      grades: o = []
-    } = this.store.get(), d = Array(e).fill({}).map((l, g) => o[g] ?? {}), p = document.createElement("article");
-    p.classList.add(this.cls("shape"));
-    const u = [];
-    for (let l = 0; l < d.length; l++) {
-      const g = d[l], n = {
-        height: r * ((l + 1) / d.length),
-        width: i * ((l + 1) / d.length) - a
-      }, m = {
-        height: n.height / (1 + l),
-        margin: l ? a : 0
+      height: t,
+      width: r,
+      gap: i,
+      grades: s = []
+    } = this.store.get(), a = Array(e).fill({}).map((n, p) => s[p] ?? {}), o = document.createElement("article");
+    o.classList.add(this.cls("shape"));
+    const l = [];
+    for (let n = 0; n < a.length; n++) {
+      const p = a[n], m = {
+        height: t * ((n + 1) / a.length),
+        width: r * ((n + 1) / a.length) - i
+      }, y = {
+        height: m.height / (1 + n),
+        margin: n ? i : 0
       };
-      u.push(
-        this.computeGrade({ pyramid: n, trapezoidal: m }, this.gradeDom(g, l))
+      l.push(
+        this.computeGrade({ pyramid: m, trapezoidal: y }, this.gradeDom(p, n))
       );
     }
-    p.append(...u), s && p.append(this.toolbarDom()), this.container.append(p), document.head.querySelector(`style[data-pyramid="${this.scope}"]`) || document.head.append(this.style());
+    return o.append(...l), o;
   }
   toolbarDom() {
-    const { paused: t } = this.store.get(), e = document.createElement("nav");
-    e.classList.add(this.cls("toolbar"));
+    const { paused: e } = this.store.get(), t = document.createElement("nav");
+    t.classList.add(this.cls("toolbar"));
     const r = document.createElement("button");
-    r.innerText = t ? "▶️" : "⏸️", v(this.store, ["paused"], ({ paused: a }) => {
-      r.innerText = a ? "▶️" : "⏸️";
+    r.innerText = e ? "▶️" : "⏸️", v(this.store, ["paused"], ({ paused: s }) => {
+      r.innerText = s ? "▶️" : "⏸️";
     }), r.addEventListener("click", () => {
       this.store.setKey("paused", !this.store.get().paused);
     });
     const i = document.createElement("input");
     return i.type = "number", i.value = this.store.get().gradesNumber.toString(), i.min = "1", i.addEventListener(
       "change",
-      (a) => {
+      (s) => {
         var o;
-        const s = (o = a.target) == null ? void 0 : o.value;
-        this.mutate("gradesNumber", parseInt(s, 10));
+        const a = (o = s.target) == null ? void 0 : o.value;
+        this.mutate("gradesNumber", parseInt(a, 10));
       },
       !1
-    ), e.append(r, i), e;
+    ), t.append(r, i), t;
   }
-  hoverGrade(t) {
-    const { paused: e } = this.store.get();
-    !e && this.store.setKey("paused", !0), t.target.classList.add(this.cls("-hover"));
+  hoverGrade(e) {
+    const { paused: t } = this.store.get();
+    !t && this.store.setKey("paused", !0), e.target.classList.add(this.cls("-hover"));
   }
-  leaveGrade(t) {
-    this.running && this.store.setKey("paused", !1), t.target.classList.remove(this.cls("-hover"));
+  leaveGrade(e) {
+    this.running && this.store.setKey("paused", !1), e.target.classList.remove(this.cls("-hover"));
   }
-  clickGrade(t, e) {
-    this.onClick(t, e);
+  clickGrade(e, t) {
+    this.onClick(e, t);
   }
-  gradeDom(t, e) {
-    const { gradesNumber: r, hideSides: i } = this.store.get(), a = document.createElement("section");
-    a.classList.add(this.cls("grade")), a.style.zIndex = `${r - e}`, a.style.animationPlayState = this.running ? "running" : "paused", a.addEventListener("mouseenter", this.hoverGrade.bind(this)), a.addEventListener("mouseleave", this.leaveGrade.bind(this));
-    const s = ["front", "back", "left", "right", "top", "bottom"].map((o) => {
-      const { color: d, text: p, textColor: u, hide: l } = {
+  gradeDom(e, t) {
+    const { gradesNumber: r, hideSides: i } = this.store.get(), s = document.createElement("section");
+    s.classList.add(this.cls("grade")), s.style.zIndex = `${r - t}`, s.style.animationPlayState = this.running ? "running" : "paused", s.addEventListener("mouseenter", this.hoverGrade.bind(this)), s.addEventListener("mouseleave", this.leaveGrade.bind(this));
+    const a = ["front", "back", "left", "right", "top", "bottom"].map((o) => {
+      const { color: l, text: n, textColor: p, hide: m } = {
         ...this.baseGrade[o],
-        ...t[o]
+        ...e[o]
       };
-      if (typeof l == "boolean" && l || i.includes(o))
+      if (typeof m == "boolean" && m || i.includes(o))
         return "";
-      const g = ["top", "bottom"].includes(o), n = document.createElement("aside");
-      n.addEventListener(
+      const y = ["top", "bottom"].includes(o), h = document.createElement("aside");
+      h.addEventListener(
         "click",
-        this.clickGrade.bind(this, { side: o, level: e + 1 })
-      ), n.classList.add(this.cls(g ? "base" : "face")), n.classList.add(this.cls("side")), n.classList.add(this.cls(o)), g ? d && (n.style.backgroundColor = d) : d && (n.style.borderBottomColor = d);
-      const m = document.createElement("span");
-      return m.classList.add(this.cls("text")), p && (m.textContent = p), u && (m.style.color = u), n.append(m), n;
+        this.clickGrade.bind(this, { side: o, level: t + 1 })
+      ), h.classList.add(this.cls(y ? "base" : "face")), h.classList.add(this.cls("side")), h.classList.add(this.cls(o)), y ? l && (h.style.backgroundColor = l) : l && (h.style.borderBottomColor = l);
+      const u = document.createElement("span");
+      return u.classList.add(this.cls("text")), n && (u.textContent = n), p && (u.style.color = p), h.append(u), h;
     });
-    return a.append(...s), a;
+    return s.append(...a), s;
   }
-  computeGrade(t, e) {
-    function r(n, m) {
-      var f = Math.atan(n / m), b = f * (180 / Math.PI);
+  computeGrade(e, t) {
+    function r(h, u) {
+      var f = Math.atan(h / u), b = f * (180 / Math.PI);
       return b;
     }
-    function i(n, m) {
-      var f = Math.sqrt(Math.pow(n, 2) + Math.pow(m, 2));
+    function i(h, u) {
+      var f = Math.sqrt(Math.pow(h, 2) + Math.pow(u, 2));
       return f;
     }
-    const a = {
+    const s = {
       height: 400,
       width: 200,
-      ...t.pyramid
-    }, s = i(a.height, a.width / 2), o = i(
-      s,
-      a.width / 2
-    ), d = 90 - r(s, a.width / 2), p = {
+      ...e.pyramid
+    }, a = i(s.height, s.width / 2), o = i(
+      a,
+      s.width / 2
+    ), l = 90 - r(a, s.width / 2), n = {
       height: 40,
       margin: 5,
-      ...t.trapezoidal
-    }, u = p.height / a.height, l = a.width / 2 * (1 - u) - s * u, g = s * u + p.margin;
-    return e.style.setProperty(
+      ...e.trapezoidal
+    }, p = n.height / s.height, m = s.width / 2 * (1 - p) - a * p, y = a * p + n.margin;
+    return t.style.setProperty(
       "--pyramid-trapezoidal-top-offset",
-      `${l}`
-    ), e.style.setProperty("--pyramid-degrees", `${d}`), e.style.setProperty("--pyramid-width", `${a.width}`), e.style.setProperty(
+      `${m}`
+    ), t.style.setProperty("--pyramid-degrees", `${l}`), t.style.setProperty("--pyramid-width", `${s.width}`), t.style.setProperty(
       "--pyramid-hypotenuse-length",
-      `${o * u}`
-    ), e.style.setProperty("--pyramid-height", `${a.height}`), e.style.setProperty("--pyramid-slant-height", `${s}`), e.style.setProperty(
+      `${o * p}`
+    ), t.style.setProperty("--pyramid-height", `${s.height}`), t.style.setProperty("--pyramid-slant-height", `${a}`), t.style.setProperty(
       "--pyramid-trapezoidal-slant-height",
-      `${g}`
-    ), e.style.setProperty(
+      `${y}`
+    ), t.style.setProperty(
       "--pyramid-trapezoidal-height",
-      `${p.height}`
-    ), e;
+      `${n.height}`
+    ), t;
   }
-  cls(t, e) {
-    return `${e ? "." : ""}pyramid-${t}-${this.scope}`;
+  cls(e, t) {
+    return `${t ? "." : ""}pyramid-${e}-${this.scope}`;
   }
   style() {
-    const { perspective: t, speed: e } = this.store.get(), r = document.createElement("style");
+    const { perspective: e, speed: t } = this.store.get(), r = document.createElement("style");
     return r.dataset.pyramid = this.scope, r.innerHTML = `
 .${this.cls("shape")} {
-  perspective: ${t}px;
+  perspective: ${e}px;
   perspective-origin: 50% 50%;
   position: relative;
 }
@@ -407,7 +416,7 @@ class L {
 }
 
 .${this.cls("grade")} {
-  animation: ${this.cls("spinning")} ${e / 1e3}s infinite linear;
+  animation: ${this.cls("spinning")} ${t / 1e3}s infinite linear;
 }
 
 @keyframes ${this.cls("spinning")} {
@@ -462,5 +471,5 @@ class L {
   }
 }
 export {
-  L as default
+  G as default
 };

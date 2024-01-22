@@ -10,14 +10,14 @@ const gp = new GradingPyramid(document.querySelector<HTMLElement>("#app")!, {
   gap: 10,
   perspective: 1500,
   toolbar: true,
-  hideSides: ["top"],
+  // hideSides: ["top"],
   speed: 8000,
   onClick(data, event) {
     console.log(data, event);
   },
 });
 
-gp.render([
+gp.setGrades([
   {},
   {},
   {
@@ -29,6 +29,10 @@ gp.render([
     top: { text: "Top" },
   },
 ]);
+
+gp.mount();
+
+gp.setGradesNumber(2);
 
 // setTimeout(() => {
 //   gp.mutate('hideSides', ['bottom', 'top'])

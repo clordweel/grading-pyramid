@@ -144,10 +144,23 @@ export default class GradingPyramid {
 
     listenKeys(
       this.store,
-      ["gradesNumber", "gap", "height", "width", "hideSides"],
-      () => this.rerender()
+      ["gradesNumber", "gap", "grades", "height", "width", "hideSides"],
+      () => {
+        this.mounted =
+          this.mounted || !!document.querySelector(this.cls("shape", true));
+
+        if (this.mounted) {
+          this.prune();
+          this.mount();
+        } else {
+          this.render();
+        }
+      }
     );
   }
+
+  // only set once on first mount
+  private mounted?: boolean;
 
   // target parent container element
   private readonly container: HTMLElement;
@@ -205,26 +218,38 @@ export default class GradingPyramid {
     this.store.setKey(key, value);
   }
 
+  public setGrades(grades: Grade[]) {
+    this.store.setKey("grades", grades);
+  }
+
+  public setGradesNumber(number: number) {
+    this.store.setKey("gradesNumber", number);
+  }
+
   public prune() {
     this.container.querySelector(this.cls("shape", true))?.remove();
   }
 
-  public rerender() {
-    this.prune();
-    this.render();
+  public mount() {
+    const { toolbar } = this.store.get();
+
+    const wrapper = this.render();
+
+    toolbar && wrapper.append(this.toolbarDom());
+
+    this.container.append(wrapper);
+
+    if (!document.head.querySelector(`style[data-pyramid="${this.scope}"]`)) {
+      document.head.append(this.style());
+    }
   }
 
-  public render(grades?: Grade[]): void {
-    if (grades) {
-      this.store.setKey("grades", grades);
-    }
-
+  public render(): HTMLElement {
     const {
       gradesNumber,
       height,
       width,
       gap,
-      toolbar,
       grades: customGrades = [],
     } = this.store.get();
 
@@ -257,13 +282,7 @@ export default class GradingPyramid {
 
     wrapperElement.append(...elements);
 
-    toolbar && wrapperElement.append(this.toolbarDom());
-
-    this.container.append(wrapperElement);
-
-    if (!document.head.querySelector(`style[data-pyramid="${this.scope}"]`)) {
-      document.head.append(this.style());
-    }
+    return wrapperElement;
   }
 
   private toolbarDom(): HTMLElement {

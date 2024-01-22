@@ -38,6 +38,7 @@ export type GradingPyramidOptions = {
 };
 export default class GradingPyramid {
     constructor(selectorOrTarget: string | HTMLElement, options?: GradingPyramidOptions);
+    private mounted?;
     private readonly container;
     private store;
     defaultOptions: Required<GradingPyramidOptions>;
@@ -48,9 +49,11 @@ export default class GradingPyramid {
     play(updateState?: boolean): void;
     pause(updateState?: boolean): void;
     mutate<K extends keyof Store>(key: K, value: Store[K]): void;
+    setGrades(grades: Grade[]): void;
+    setGradesNumber(number: number): void;
     prune(): void;
-    rerender(): void;
-    render(grades?: Grade[]): void;
+    mount(): void;
+    render(): HTMLElement;
     private toolbarDom;
     private hoverGrade;
     private leaveGrade;
