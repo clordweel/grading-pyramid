@@ -48,7 +48,7 @@ export type GradingPyramidOptions = {
   // style's working scope, for multiple instances
   scope?: string;
 
-  // immediate render, default true
+  // mount immediately, default true
   immediate?: boolean;
 
   // how many grades need, default 1
@@ -136,7 +136,7 @@ export default class GradingPyramid {
       })
     );
 
-    if (immediate) this.render();
+    if (immediate) this.mount();
 
     listenKeys(this.store, ["paused"], ({ paused }) => {
       paused ? this.pause(false) : this.play(false);

@@ -138,7 +138,7 @@ class G {
         hideSides: u,
         toolbar: f
       })
-    ), i && this.render(), v(this.store, ["paused"], ({ paused: w }) => {
+    ), i && this.mount(), v(this.store, ["paused"], ({ paused: w }) => {
       w ? this.pause(!1) : this.play(!1);
     }), v(
       this.store,

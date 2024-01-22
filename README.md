@@ -177,7 +177,7 @@ export type GradingPyramidOptions = {
   // style's working scope, for multiple instances
   scope?: string;
 
-  // immediate render, default true
+  // mount immediately, default true
   immediate?: boolean;
 
   // how many grades need, default 1
