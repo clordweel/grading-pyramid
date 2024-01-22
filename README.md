@@ -102,6 +102,30 @@ gp.render([
 ]);
 ```
 
+## Methods
+
+```ts
+// control animation
+// @param updateState whether update state or not, default true
+play(updateState?: boolean): void;
+pause(updateState?: boolean): void;
+
+// set grades data
+setGrades(grades: Grade[]): void;
+
+// set grades number
+setGradesNumber(number: number): void;
+
+// remove mounted pyramid's root element
+prune(): void;
+
+// mount pyramid's root element
+mount(): void;
+
+// get rendered pyramid's root element
+render(): HTMLElement;
+```
+
 ## Typing
 
 ```ts
@@ -111,6 +135,23 @@ export type SideEventData = {
 
   // clicked side name
   side: Side;
+};
+
+type Store = {
+  paused: boolean;
+  speed: number;
+  perspective: number;
+
+  grades: Grade[];
+
+  gradesNumber: number;
+  height: number;
+  width: number;
+  gap: number;
+
+  hideSides: Side[];
+
+  toolbar: boolean;
 };
 
 type Side = "top" | "bottom" | "left" | "right" | "front" | "back";
@@ -136,8 +177,8 @@ export type GradingPyramidOptions = {
   // style's working scope, for multiple instances
   scope?: string;
 
-  // auto render, default true
-  render?: boolean;
+  // immediate render, default true
+  immediate?: boolean;
 
   // how many grades need, default 1
   gradesNumber?: number;

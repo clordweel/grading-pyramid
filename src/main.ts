@@ -3,14 +3,14 @@ import "./style.css";
 import GradingPyramid from "./GradingPyramid";
 
 const gp = new GradingPyramid(document.querySelector<HTMLElement>("#app")!, {
-  render: false,
+  immediate: false,
   height: 500,
   width: 400,
   gradesNumber: 5,
   gap: 10,
   perspective: 1500,
   toolbar: true,
-  // hideSides: ["top"],
+  hideSides: ["top"],
   speed: 8000,
   onClick(data, event) {
     console.log(data, event);

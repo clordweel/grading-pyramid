@@ -78,7 +78,7 @@ class G {
     // component's state management
     g(this, "store", E());
     g(this, "defaultOptions", {
-      render: !0,
+      immediate: !0,
       baseGrade: {
         front: { color: "rgba(120, 120, 120, 0.35)" },
         back: { color: "rgba(120, 120, 120, 0.35)" },
@@ -109,7 +109,7 @@ class G {
       throw new Error("Target not found");
     this.container = r;
     const {
-      render: i,
+      immediate: i,
       running: s,
       speed: a,
       baseGrade: o,

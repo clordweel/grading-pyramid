@@ -23,7 +23,7 @@ export type Grade = Partial<Record<Side, {
 }>>;
 export type GradingPyramidOptions = {
     scope?: string;
-    render?: boolean;
+    immediate?: boolean;
     gradesNumber?: number;
     perspective?: number;
     height?: number;
