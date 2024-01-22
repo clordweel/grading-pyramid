@@ -72,6 +72,10 @@ const gp = new GradingPyramid(
     // should be unique, if need multiple pyramid, use this to distinguish
     scope: "another-one",
 
+    // not mount immediately
+    immediate: false,
+
+    // size of pyramid
     height: 500,
     width: 400,
 
@@ -90,7 +94,7 @@ const gp = new GradingPyramid(
 );
 
 // render custom grades
-gp.render([
+gp.setGrades([
   {},
   {},
   {
@@ -100,6 +104,8 @@ gp.render([
     right: { text: "Right" },
   },
 ]);
+
+gp.mount();
 ```
 
 ## Methods
